@@ -91,6 +91,20 @@ server.on('message',(msg,rinfo)=>{
         msg: '响应请求',
         otherAddress: rinfo.address
       })
+    }else if(JSON.parse(msg).status == 'responseUser'){
+      if(JSON.parse(msg).agree == 'yes'){
+        me.send('notice-vice', {
+          status: 'responseUser',
+          agree: 'yes',
+          otherAddress: rinfo.address
+        })
+      }else{
+        me.send('notice-vice', {
+          status: 'responseUser',
+          agree: 'no',
+          otherAddress: rinfo.address
+        })
+      }
     }
     // else if(JSON.parse(msg).status == 'start'){
     //   console.log('start')
@@ -137,16 +151,16 @@ ipc.on('notice-main',(event, arg)=>{
     }),'8066',arg.otherAddress)
   }else if(arg.status == 'agreeUser'){
     if(arg.agree == 'yes'){
-      me.send('notice-vice', {
+      server.send(JSON.stringify({
         status: 'responseUser',
-        agree: 'yes',
-        otherAddress: arg.otherAddress
-      })
+        agree: 'yes'
+      }),'8066',arg.otherAddress)
+      
     }else{
-      me.send('notice-vice', {
+      server.send(JSON.stringify({
         status: 'responseUser',
         agree: 'no'
-      })
+      }),'8066',arg.otherAddress)
     }
   }
   // else if(arg.status == 'start'){

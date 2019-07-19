@@ -95,18 +95,19 @@ export default {
           console.log('拒绝对方的请求')
           ipc.send('notice-main', {
             status: 'agreeUser',
-            agree: 'no'
+            agree: 'no',
+            otherAddress: this.otherAddress
           })
         }
       }else if(arg.status == 'responseUser'){
         if(arg.agree == 'yes'){
-          console.log('对方同意了你的请求')
+          console.log(`${arg.otherAddress}同意了你的请求`)
           this.openDraw();
           this.otherAddress = arg.otherAddress
           this.drawShow = 'block'
         }else{
-          console.log('对方拒绝了你的请求')
-          alert('对方拒绝了你的请求')
+          console.log(`${arg.otherAddress}拒绝了你的请求`)
+          alert(`${arg.otherAddress}拒绝了你的请求`)
           this.otherAddress = ''
         }
       }
