@@ -12,15 +12,23 @@
           </li>
         </ul>
       </div>
-      <canvas @mousedown="start($event)" @mousemove="drawing($event)" @mouseup="stop" id="canvas" :style="{display:drawShow}">
-
-      </canvas>
+      <div class="canvas" id="canvasDiv">
+        <canvas @mousedown="start($event)" @mousemove="drawing($event)" @mouseup="stop" id="canvas" :style="{display:drawShow}">
+  
+        </canvas>
+      </div>
     </main>
   </div>
 </template>
 
 <script>
 const ipc = require('electron').ipcRenderer
+window.addEventListener('resize',function(){
+  let canvas = document.getElementById('canvas');
+  let canvasDiv = document.getElementById('canvasDiv')
+  canvas.width = canvasDiv.offsetWidth;
+  canvas.height = canvasDiv.offsetHeight;
+},false)
 
 export default {
   data() {
@@ -28,7 +36,7 @@ export default {
       drawShow: 'none',
       connections: [],
       otherAddress: '',
-      cxt: null,
+      ctx: null,
       tag: false,
       x: 0,
       y: 0
@@ -49,22 +57,31 @@ export default {
       })
     },
     openDraw(){
+      this.drawShow = 'block'
       let canvas = document.getElementById('canvas')
-      cxt = canvas.getContext("2d")
-      ctx.lineWidth = 3
+      let canvasDiv = document.getElementById('canvasDiv')
+      canvas.width = canvasDiv.offsetWidth
+      canvas.height = canvasDiv.offsetHeight
+      this.ctx = canvas.getContext("2d")
+      this.ctx.lineWidth = 3
     },
     start(e){
-      this.x = document.documentElement.scrollLeft + e.clientX;
-      this.y = document.documentElement.scrollTop + e.clientY;
-      ctx.moveTo(this.x,this.y)
+      let canvasDiv = document.getElementById('canvasDiv')
+      this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft;
+      this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop;
+      this.ctx.moveTo(this.x,this.y)
+      console.log(this.x,this.y)
       this.tag = true
     },
     drawing(e){
       if(this.tag){
-        this.x = document.documentElement.scrollLeft + e.clientX;
-        this.y = document.documentElement.scrollTop + e.clientY;
-        ctx.lineTo(this.x,this.y)
-        ctx.stroke()
+        let canvasDiv = document.getElementById('canvasDiv')
+        this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft;
+        this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop;
+        this.ctx.lineTo(this.x,this.y)
+        console.log(this.x,this.y)
+        console.log(this.ctx)
+        this.ctx.stroke()
       }
     },
     stop(){
@@ -85,18 +102,17 @@ export default {
           console.log('同意对方的请求')
           this.openDraw();
           this.otherAddress = arg.otherAddress
-          this.drawShow = 'block'
           ipc.send('notice-main', {
             status: 'agreeUser',
             agree: 'yes',
-            otherAddress: this.otherAddress
+            otherAddress: arg.otherAddress
           })
         }else{
           console.log('拒绝对方的请求')
           ipc.send('notice-main', {
             status: 'agreeUser',
             agree: 'no',
-            otherAddress: this.otherAddress
+            otherAddress: arg.otherAddress
           })
         }
       }else if(arg.status == 'responseUser'){
@@ -104,7 +120,6 @@ export default {
           console.log(`${arg.otherAddress}同意了你的请求`)
           this.openDraw();
           this.otherAddress = arg.otherAddress
-          this.drawShow = 'block'
         }else{
           console.log(`${arg.otherAddress}拒绝了你的请求`)
           alert(`${arg.otherAddress}拒绝了你的请求`)
@@ -144,10 +159,14 @@ export default {
           margin-top: 15px;
         }
       }
-      canvas{
+      .canvas{
         box-sizing: border-box;
         width: 70%;
-        background: silver;
+        position: relative;
+        z-index: 10;
+        canvas{
+          background: pink;
+        }
       }
     }
   }
