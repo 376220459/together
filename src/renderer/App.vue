@@ -12,4 +12,8 @@
 
 <style>
   /* CSS */
+  #app{
+    height: 100%;
+    font-family: 'KaiTi';
+  }
 </style>

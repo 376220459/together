@@ -1,128 +1,130 @@
 <template>
-  <div id="wrapper">
-    <img id="logo" src="~@/assets/logo.png" alt="electron-vue">
+  <div class="whole">
+    <div class="title">Hello，欢迎来到协作助手</div>
+    <hr>
     <main>
-      <div class="left-side">
-        <span class="title">
-          Welcome to your new project!
-        </span>
-        <system-information></system-information>
+      <div class="list">
+        <el-button class="get-button" @click="getConnections">获取当前用户</el-button>
+        <ul>
+          <li v-for="(item, index) in connections" :key="index">
+            <span>{{ item }}</span>
+            <el-button @click="connectTo(item)">和他协作</el-button>
+          </li>
+        </ul>
       </div>
+      <canvas :style="{display:drawShow}">
 
-      <div class="right-side">
-        <div class="doc">
-          <div class="title">Getting Started</div>
-          <p>
-            electron-vue comes packed with detailed documentation that covers everything from
-            internal configurations, using the project structure, building your application,
-            and so much more.
-          </p>
-          <button @click="open('https://simulatedgreg.gitbooks.io/electron-vue/content/')">Read the Docs</button><br><br>
-        </div>
-        <div class="doc">
-          <div class="title alt">Other Documentation</div>
-          <button class="alt" @click="open('https://electron.atom.io/docs/')">Electron</button>
-          <button class="alt" @click="open('https://vuejs.org/v2/guide/')">Vue.js</button>
-        </div>
-      </div>
+      </canvas>
     </main>
   </div>
 </template>
 
 <script>
-  import SystemInformation from './LandingPage/SystemInformation'
+const ipc = require('electron').ipcRenderer
 
-  export default {
-    name: 'landing-page',
-    components: { SystemInformation },
-    methods: {
-      open (link) {
-        this.$electron.shell.openExternal(link)
-      }
+export default {
+  data() {
+    return {
+      drawShow: 'none',
+      connections: [],
+      otherAddress: '',
+      cxt: null
     }
-  }
+  },
+  methods: {
+    getConnections(){
+      ipc.send('notice-main', {
+        status: 'getConnections'
+      })
+    },
+    connectTo(address){
+      address = address.slice(0,-5)
+      this.otherAddress = address
+      ipc.send('notice-main', {
+        status: 'requestUser',
+        otherAddress: this.otherAddress
+      })
+      // let canvas = document.getElementById('canvas')
+      // cxt = document.getElementById('canvas').getContext("2d")
+      // cxt2 = document.getElementById('canvas').getContext("2d")
+      // this.drawShow = 'block'
+    },
+  },
+  mounted() {
+    ipc.on('notice-vice', (event, arg)=>{
+      if(arg.status == 'getConnections'){
+        console.log(arg.msg)
+      }else if(arg.status == 'returnConnections'){
+        console.log(arg.msg)
+        this.connections = arg.connections;
+        // this.$set(this.connections,0,...arg.connections)
+      }else if(arg.status == 'responseDraw'){
+        let con = confirm(`${arg.otherAddress} 请求与您一同协作，是否同意？`)
+        if(con){
+          console.log('同意对方的请求')
+          this.otherAddress = arg.otherAddress
+          this.drawShow = 'block'
+          ipc.send('notice-main', {
+            status: 'agreeUser',
+            agree: 'yes',
+            otherAddress: this.otherAddress
+          })
+        }else{
+          console.log('拒绝对方的请求')
+          ipc.send('notice-main', {
+            status: 'agreeUser',
+            agree: 'no'
+          })
+        }
+      }else if(arg.status == 'responseUser'){
+        if(arg.agree){
+          console.log('对方同意了你的请求')
+          this.otherAddress = arg.otherAddress
+          this.drawShow = 'block'
+        }else{
+          console.log('对方拒绝了你的请求')
+          alert('对方拒绝了你的请求')
+          this.otherAddress = ''
+        }
+      }
+      // else if(arg.status == 'start'){
+      //   this.start_2(arg.e)
+      // }else if(arg.status == 'stop'){
+      //   this.stop_2()
+      // }else if(arg.status == 'putPoint'){
+      //   this.putPoint_2(arg.e)
+      // }
+    })
+  },
+}
 </script>
 
-<style>
-  @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
-
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  body { font-family: 'Source Sans Pro', sans-serif; }
-
-  #wrapper {
-    background:
-      radial-gradient(
-        ellipse at top left,
-        rgba(255, 255, 255, 1) 40%,
-        rgba(229, 229, 229, .9) 100%
-      );
-    height: 100vh;
-    padding: 60px 80px;
-    width: 100vw;
-  }
-
-  #logo {
-    height: auto;
-    margin-bottom: 20px;
-    width: 420px;
-  }
-
-  main {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  main > div { flex-basis: 50%; }
-
-  .left-side {
+<style lang="scss" scoped>
+  .whole{
+    height: 100%;
     display: flex;
     flex-direction: column;
-  }
-
-  .welcome {
-    color: #555;
-    font-size: 23px;
-    margin-bottom: 10px;
-  }
-
-  .title {
-    color: #2c3e50;
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 6px;
-  }
-
-  .title.alt {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-
-  .doc p {
-    color: black;
-    margin-bottom: 10px;
-  }
-
-  .doc button {
-    font-size: .8em;
-    cursor: pointer;
-    outline: none;
-    padding: 0.75em 2em;
-    border-radius: 2em;
-    display: inline-block;
-    color: #fff;
-    background-color: #4fc08d;
-    transition: all 0.15s ease;
-    box-sizing: border-box;
-    border: 1px solid #4fc08d;
-  }
-
-  .doc button.alt {
-    color: #42b983;
-    background-color: transparent;
+    .title{
+      text-align: center;
+      font-size: 30px;
+      color: skyblue;
+    }
+    main{
+      flex-grow: 1;
+      display: flex;
+      .list{
+        box-sizing: border-box;
+        width: 30%;
+        padding: 20px;
+        ul{
+          margin-top: 15px;
+        }
+      }
+      canvas{
+        box-sizing: border-box;
+        width: 70%;
+        background: silver;
+      }
+    }
   }
 </style>
