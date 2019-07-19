@@ -12,7 +12,7 @@
           </li>
         </ul>
       </div>
-      <canvas :style="{display:drawShow}">
+      <canvas @mousedown="start($event)" @mousemove="drawing($event)" @mouseup="stop" id="canvas" :style="{display:drawShow}">
 
       </canvas>
     </main>
@@ -28,7 +28,10 @@ export default {
       drawShow: 'none',
       connections: [],
       otherAddress: '',
-      cxt: null
+      cxt: null,
+      tag: false,
+      x: 0,
+      y: 0
     }
   },
   methods: {
@@ -44,11 +47,29 @@ export default {
         status: 'requestUser',
         otherAddress: this.otherAddress
       })
-      // let canvas = document.getElementById('canvas')
-      // cxt = document.getElementById('canvas').getContext("2d")
-      // cxt2 = document.getElementById('canvas').getContext("2d")
-      // this.drawShow = 'block'
     },
+    openDraw(){
+      let canvas = document.getElementById('canvas')
+      cxt = canvas.getContext("2d")
+      ctx.lineWidth = 3
+    },
+    start(e){
+      this.x = document.documentElement.scrollLeft + e.clientX;
+      this.y = document.documentElement.scrollTop + e.clientY;
+      ctx.moveTo(this.x,this.y)
+      this.tag = true
+    },
+    drawing(e){
+      if(this.tag){
+        this.x = document.documentElement.scrollLeft + e.clientX;
+        this.y = document.documentElement.scrollTop + e.clientY;
+        ctx.lineTo(this.x,this.y)
+        ctx.stroke()
+      }
+    },
+    stop(){
+      this.tag = false
+    }
   },
   mounted() {
     ipc.on('notice-vice', (event, arg)=>{
@@ -62,6 +83,7 @@ export default {
         let con = confirm(`${arg.otherAddress} 请求与您一同协作，是否同意？`)
         if(con){
           console.log('同意对方的请求')
+          this.openDraw();
           this.otherAddress = arg.otherAddress
           this.drawShow = 'block'
           ipc.send('notice-main', {
@@ -77,8 +99,9 @@ export default {
           })
         }
       }else if(arg.status == 'responseUser'){
-        if(arg.agree){
+        if(arg.agree == 'yes'){
           console.log('对方同意了你的请求')
+          this.openDraw();
           this.otherAddress = arg.otherAddress
           this.drawShow = 'block'
         }else{

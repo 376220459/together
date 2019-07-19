@@ -136,7 +136,7 @@ ipc.on('notice-main',(event, arg)=>{
       status: 'requestUser'
     }),'8066',arg.otherAddress)
   }else if(arg.status == 'agreeUser'){
-    if(arg.agree){
+    if(arg.agree == 'yes'){
       me.send('notice-vice', {
         status: 'responseUser',
         agree: 'yes',
