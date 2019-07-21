@@ -99,12 +99,11 @@ export default {
     },
     otherStart(e){
       let canvasDiv = document.getElementById('canvasDiv')
-      this.otherpath.moveTo(e.x,e.y)
+      this.otherpath.moveTo(e.clientX,e.clientY)
       this.othertag = true
     },
     drawing(e){
       if(this.tag){
-        let canvasDiv = document.getElementById('canvasDiv')
         this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft;
         this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop;
         this.path.lineTo(this.x,this.y)
@@ -113,8 +112,7 @@ export default {
     },
     otherDrawing(e){
       if(this.othertag){
-        let canvasDiv = document.getElementById('canvasDiv')
-        this.otherpath.lineTo(e.x,e.y)
+        this.otherpath.lineTo(e.clientX,e.clientY)
         this.ctx.stroke(this.otherpath)
       }
     },
@@ -156,12 +154,16 @@ export default {
     }
   },
   mounted() {
+    ipc.send('notice-main', {
+      status: 'connect'
+    })
     ipc.on('notice-vice', (event, arg)=>{
       if(arg.status == 'getConnections'){
         console.log(arg.msg)
       }else if(arg.status == 'returnConnections'){
         console.log(arg.msg)
-        this.connections = arg.connections;
+        this.connections = arg.connections
+        this.$message.success('有新用户加入啦')
         // this.$set(this.connections,0,...arg.connections)
       }else if(arg.status == 'responseDraw'){
         let con = confirm(`${arg.otherAddress} 请求与您一同协作，是否同意？`)
@@ -207,7 +209,7 @@ export default {
       //   this.putPoint_2(arg.e)
       // }
     })
-  },
+  }
 }
 </script>
 

@@ -71,7 +71,8 @@ server.on("listening",()=>{
 })
 
 server.on('message',(msg,rinfo)=>{
-    if(JSON.parse(msg).status == 'access'){
+    // if(JSON.parse(msg).status == 'access'){
+    if(JSON.parse(msg).status == 'access' && rinfo.address !== IPAddress){
       if(connections.indexOf(rinfo.address + ':' + rinfo.port) == -1){
         connections.push(rinfo.address + ':' + rinfo.port)
       }
@@ -148,13 +149,16 @@ server.on('message',(msg,rinfo)=>{
 
 server.bind('8066')
 
-
 ipc.on('notice-main',(event, arg)=>{
-  if(arg.status == 'getConnections'){
+  if(arg.status == 'connect'){
+    me = event.sender
+    server.send(JSON.stringify({
+      status: 'access'
+    }),'8066',multicastAddr)
+  }else if(arg.status == 'getConnections'){
     server.send(JSON.stringify({
       status: 'getConnections'
     }),'8066',multicastAddr)
-    me = event.sender
     me.send('notice-vice', {
       status: 'getConnections',//正在获取列表...
       msg: '正在获取列表...'
