@@ -105,6 +105,20 @@ server.on('message',(msg,rinfo)=>{
           otherAddress: rinfo.address
         })
       }
+    }else if(JSON.parse(msg).status == 'otherStart'){
+      me.send('notice-vice', {
+        status: 'otherStart',
+        e: JSON.parse(msg).e
+      })
+    }else if(JSON.parse(msg).status == 'otherDrawing'){
+      me.send('notice-vice', {
+        status: 'otherDrawing',
+        e: JSON.parse(msg).e
+      })
+    }else if(JSON.parse(msg).status == 'otherStop'){
+      me.send('notice-vice', {
+        status: 'otherStop'
+      })
     }
     // else if(JSON.parse(msg).status == 'start'){
     //   console.log('start')
@@ -162,6 +176,20 @@ ipc.on('notice-main',(event, arg)=>{
         agree: 'no'
       }),'8066',arg.otherAddress)
     }
+  }else if(arg.status == 'sendStart'){
+    server.send(JSON.stringify({
+      status: 'otherStart',
+      e: arg.e
+    }),'8066',arg.otherAddress)
+  }else if(arg.status == 'sendDrawing'){
+    server.send(JSON.stringify({
+      status: 'otherDrawing',
+      e: arg.e
+    }),'8066',arg.otherAddress)
+  }else if(arg.status == 'sendStop'){
+    server.send(JSON.stringify({
+      status: 'otherStop'
+    }),'8066',arg.otherAddress)
   }
   // else if(arg.status == 'start'){
   //   server.send(JSON.stringify({

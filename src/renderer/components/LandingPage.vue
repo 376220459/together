@@ -4,7 +4,8 @@
     <hr>
     <main>
       <div class="list">
-        <el-button class="get-button" @click="getConnections">获取当前用户</el-button>
+        <el-button class="get-button" @click="getConnections" type="primary" round>刷新用户列表</el-button>
+        <div class="user-title">用户列表:</div>
         <ul>
           <li v-for="(item, index) in connections" :key="index">
             <span>{{ item }}</span>
@@ -13,8 +14,8 @@
         </ul>
       </div>
       <div class="canvas" id="canvasDiv">
-        <canvas @mousedown="start($event)" @mousemove="drawing($event)" @mouseup="stop" id="canvas" :style="{display:drawShow}">
-  
+        <canvas @mousedown="start($event);sendStart($event)" @mousemove="drawing($event);sendDrawing($event)" @mouseup="stop();sendStop()" id="canvas" :style="{display:drawShow}">
+          <div>画板</div>
         </canvas>
       </div>
     </main>
@@ -22,13 +23,29 @@
 </template>
 
 <script>
+import { clearTimeout } from 'timers';
 const ipc = require('electron').ipcRenderer
-window.addEventListener('resize',function(){
-  let canvas = document.getElementById('canvas');
+function debounce(func,wait){
+  let id = null;
+  return function(){
+    let args = arguments;
+    let that = this;
+    if(id){
+      clearTimeout(id);
+    }
+    id = setTimeout(() => {
+      func.apply(that,args)
+    }, wait);
+  }
+}
+window.addEventListener('resize',debounce(function(){
+  let canvas = document.getElementById('canvas')
   let canvasDiv = document.getElementById('canvasDiv')
+  // canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth;
+  // canvas.height = canvasDiv.offsetHeight > 50 ? canvasDiv.offsetHeight - 50 : canvasDiv.offsetHeight;
   canvas.width = canvasDiv.offsetWidth;
   canvas.height = canvasDiv.offsetHeight;
-},false)
+},500),false)
 
 export default {
   data() {
@@ -37,13 +54,17 @@ export default {
       connections: [],
       otherAddress: '',
       ctx: null,
+      path: null,
+      otherpath: null,
       tag: false,
+      othertag: false,
       x: 0,
       y: 0
     }
   },
   methods: {
     getConnections(){
+      // this.openDraw();
       ipc.send('notice-main', {
         status: 'getConnections'
       })
@@ -60,32 +81,78 @@ export default {
       this.drawShow = 'block'
       let canvas = document.getElementById('canvas')
       let canvasDiv = document.getElementById('canvasDiv')
-      canvas.width = canvasDiv.offsetWidth
-      canvas.height = canvasDiv.offsetHeight
+      // canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth;
+      // canvas.height = canvasDiv.offsetHeight > 50 ? canvasDiv.offsetHeight - 50 : canvasDiv.offsetHeight;
+      canvas.width = canvasDiv.offsetWidth;
+      canvas.height = canvasDiv.offsetHeight;
       this.ctx = canvas.getContext("2d")
       this.ctx.lineWidth = 3
+      this.path = new Path2D()
+      this.otherpath = new Path2D()
     },
     start(e){
       let canvasDiv = document.getElementById('canvasDiv')
       this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft;
       this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop;
-      this.ctx.moveTo(this.x,this.y)
-      console.log(this.x,this.y)
+      this.path.moveTo(this.x,this.y)
       this.tag = true
+    },
+    otherStart(e){
+      let canvasDiv = document.getElementById('canvasDiv')
+      this.otherpath.moveTo(e.x,e.y)
+      this.othertag = true
     },
     drawing(e){
       if(this.tag){
         let canvasDiv = document.getElementById('canvasDiv')
         this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft;
         this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop;
-        this.ctx.lineTo(this.x,this.y)
-        console.log(this.x,this.y)
-        console.log(this.ctx)
-        this.ctx.stroke()
+        this.path.lineTo(this.x,this.y)
+        this.ctx.stroke(this.path)
+      }
+    },
+    otherDrawing(e){
+      if(this.othertag){
+        let canvasDiv = document.getElementById('canvasDiv')
+        this.otherpath.lineTo(e.x,e.y)
+        this.ctx.stroke(this.otherpath)
       }
     },
     stop(){
       this.tag = false
+    },
+    otherStop(){
+      this.othertag = false
+    },
+    sendStart(e){
+      let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft;
+      let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop;
+      ipc.send('notice-main', {
+        status: 'sendStart',
+        otherAddress: this.otherAddress,
+        e: {
+          clientX: x,
+          clientY: y
+        }
+      })
+    },
+    sendDrawing(e){
+      let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft;
+      let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop;
+      ipc.send('notice-main', {
+        status: 'sendDrawing',
+        otherAddress: this.otherAddress,
+        e: {
+          clientX: x,
+          clientY: y
+        }
+      })
+    },
+    sendStop(){
+      ipc.send('notice-main', {
+        status: 'sendStop',
+        otherAddress: this.otherAddress
+      })
     }
   },
   mounted() {
@@ -125,6 +192,12 @@ export default {
           alert(`${arg.otherAddress}拒绝了你的请求`)
           this.otherAddress = ''
         }
+      }else if(arg.status == 'otherStart'){
+        this.otherStart(arg.e)
+      }else if(arg.status == 'otherDrawing'){
+        this.otherDrawing(arg.e)
+      }else if(arg.status == 'otherStop'){
+        this.otherStop()
       }
       // else if(arg.status == 'start'){
       //   this.start_2(arg.e)
@@ -141,6 +214,8 @@ export default {
 <style lang="scss" scoped>
   .whole{
     height: 100%;
+    min-width: 1000px;
+    min-height: 600px;
     display: flex;
     flex-direction: column;
     .title{
@@ -154,9 +229,14 @@ export default {
       .list{
         box-sizing: border-box;
         width: 30%;
+        border-right: 1px dotted black;
         padding: 20px;
+        text-align: center;
+        .user-title{
+          margin: 15px 0;
+        }
         ul{
-          margin-top: 15px;
+          overflow: auto;
         }
       }
       .canvas{
@@ -165,7 +245,12 @@ export default {
         position: relative;
         z-index: 10;
         canvas{
+          position: relative;
           background: pink;
+          border-radius: 50px;
+          div{
+            position: absolute;
+          }
         }
       }
     }
