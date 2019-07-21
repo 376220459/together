@@ -63,7 +63,7 @@ export default {
     return {
       drawShow: 'none',
       color: 'black',
-      colorStyle: [],
+      colorStyle: [,,,,'background:white;border:7px solid black;'],
       otherColor: 'black',
       connections: [],
       otherAddress: '',
@@ -136,6 +136,7 @@ export default {
       let canvasDiv = document.getElementById('canvasDiv')
       this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
       this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
+      this.ctx.beginPath()
       this.path = new Path2D()
       this.ctx.strokeStyle = this.color
       this.path.moveTo(this.x,this.y)
@@ -143,14 +144,16 @@ export default {
     },
     otherStart(e){
       this.otherColor = e.color
+      this.ctx.beginPath()
       this.otherpath = new Path2D()
       this.otherctx.strokeStyle = this.otherColor
-      this.otherpath.moveTo(e.clientX,e.clientY)
+      this.otherpath.moveTo(e.clientX-50,e.clientY-50)
       this.othertag = true
     },
     drawing(e){
       let canvasDiv = document.getElementById('canvasDiv')
       if(this.tag){
+        this.ctx.strokeStyle = this.color
         this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
         this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
         this.path.lineTo(this.x,this.y)
@@ -159,7 +162,8 @@ export default {
     },
     otherDrawing(e){
       if(this.othertag){
-        this.otherpath.lineTo(e.clientX,e.clientY)
+        this.otherctx.strokeStyle = this.otherColor
+        this.otherpath.lineTo(e.clientX-50,e.clientY-50)
         this.otherctx.stroke(this.otherpath)
       }
     },
@@ -213,7 +217,7 @@ export default {
         console.log(arg.msg)
       }else if(arg.status == 'returnConnections'){
         console.log(arg.msg)
-        if(this.connections.length != arg.connections.length){
+        if(this.connections.join('') != arg.connections.join('')){
           this.$message({
             message: '用户列表更新啦',
             type: 'success',
