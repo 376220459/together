@@ -98,11 +98,11 @@ export default {
       this.tag = true
     },
     otherStart(e){
-      let canvasDiv = document.getElementById('canvasDiv')
       this.otherpath.moveTo(e.clientX,e.clientY)
       this.othertag = true
     },
     drawing(e){
+      let canvasDiv = document.getElementById('canvasDiv')
       if(this.tag){
         this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft;
         this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop;
