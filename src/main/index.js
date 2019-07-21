@@ -11,9 +11,9 @@ const winURL = process.env.NODE_ENV === 'development'
 
 function createWindow () {
   mainWindow = new BrowserWindow({
-    height: 563,
+    height: 600,
     useContentSize: true,
-    width: 1000
+    width: 1100
   })
 
   mainWindow.loadURL(winURL)
@@ -71,14 +71,14 @@ server.on("listening",()=>{
 })
 
 server.on('message',(msg,rinfo)=>{
-    // if(JSON.parse(msg).status == 'access'){
-    if(JSON.parse(msg).status == 'access' && rinfo.address !== IPAddress){
+    if(JSON.parse(msg).status == 'access'){
+    // if(JSON.parse(msg).status == 'access' && rinfo.address !== IPAddress){
       if(connections.indexOf(rinfo.address + ':' + rinfo.port) == -1){
         connections.push(rinfo.address + ':' + rinfo.port)
         
-        server.send(JSON.stringify({
-          status: 'access'
-        }),'8066',rinfo.address);
+        // server.send(JSON.stringify({
+        //   status: 'access'
+        // }),'8066',rinfo.address);
       }
       me.send('notice-vice', {
         status: 'returnConnections',//返回列表
@@ -87,7 +87,6 @@ server.on('message',(msg,rinfo)=>{
       })
     // }else if(JSON.parse(msg).status == 'getConnections'){
     }else if(JSON.parse(msg).status == 'getConnections' && rinfo.address !== IPAddress){
-      connections = [];
       server.send(JSON.stringify({
         status: 'access'
       }),'8066',rinfo.address);
@@ -125,31 +124,11 @@ server.on('message',(msg,rinfo)=>{
       me.send('notice-vice', {
         status: 'otherStop'
       })
+    }else if(JSON.parse(msg).status == 'exitDraw'){
+      me.send('notice-vice', {
+        status: 'exitDraw'
+      })
     }
-    // else if(JSON.parse(msg).status == 'start'){
-    //   console.log('start')
-      
-    //   me.send('notice-vice', {
-    //     status: 'start',
-    //     msg: 'start',
-    //     e: JSON.parse(msg).e
-    //   })
-    // }else if(JSON.parse(msg).status == 'stop'){
-    //   console.log('stop')
-      
-    //   me.send('notice-vice', {
-    //     status: 'stop',
-    //     msg: 'stop'
-    //   })
-    // }else if(JSON.parse(msg).status == 'putPoint'){
-    //   console.log('putPoint')
-      
-    //   me.send('notice-vice', {
-    //     status: 'putPoint',
-    //     msg: 'putPoint',
-    //     e: JSON.parse(msg).e
-    //   })
-    // }
 })
 
 server.bind('8066')
@@ -161,9 +140,11 @@ ipc.on('notice-main',(event, arg)=>{
       status: 'access'
     }),'8066',multicastAddr)
   }else if(arg.status == 'getConnections'){
+    connections = [];
     server.send(JSON.stringify({
       status: 'getConnections'
     }),'8066',multicastAddr)
+    // me = event.sender
     me.send('notice-vice', {
       status: 'getConnections',//正在获取列表...
       msg: '正在获取列表...'
@@ -199,23 +180,9 @@ ipc.on('notice-main',(event, arg)=>{
     server.send(JSON.stringify({
       status: 'otherStop'
     }),'8066',arg.otherAddress)
+  }else if(arg.status == 'exitDraw'){
+    server.send(JSON.stringify({
+      status: 'exitDraw'
+    }),'8066',arg.otherAddress)
   }
-  // else if(arg.status == 'start'){
-  //   server.send(JSON.stringify({
-  //     status: 'start',
-  //     msg: 'start',
-  //     e: arg.e
-  //   }),'8066',arg.otherAddress);
-  // }else if(arg.status == 'stop'){
-  //   server.send(JSON.stringify({
-  //     status: 'stop',
-  //     msg: 'stop'
-  //   }),'8066',arg.otherAddress);
-  // }else if(arg.status == 'putPoint'){
-  //   server.send(JSON.stringify({
-  //     status: 'putPoint',
-  //     msg: 'putPoint',
-  //     e: arg.e
-  //   }),'8066',arg.otherAddress);
-  // }
 })

@@ -9,14 +9,25 @@
         <ul>
           <li v-for="(item, index) in connections" :key="index">
             <span>{{ item }}</span>
-            <el-button @click="connectTo(item)">和他协作</el-button>
+            <el-button @click="connectTo(item)" type="success" round>和他协作</el-button>
           </li>
         </ul>
       </div>
       <div class="canvas" id="canvasDiv">
+        <div v-if="this.drawShow == 'block' ? true : false" class="canvas-top">
+          <div class="canvas-tip">您正在与 {{ otherAddress }} 协作...</div>
+          <el-button @click="exitDraw" type="danger" round>终止协作</el-button>
+        </div>
         <canvas @mousedown="start($event);sendStart($event)" @mousemove="drawing($event);sendDrawing($event)" @mouseup="stop();sendStop()" id="canvas" :style="{display:drawShow}">
-          <div>画板</div>
+          您的浏览器暂不支持canvas...
         </canvas>
+        <div v-if="this.drawShow == 'block' ? true : false" class="canvas-tools">
+          <div @click="changeColor('#F56C6C',0)" class="red" :style=colorStyle[0]></div>
+          <div @click="changeColor('#67C23A',1)" class="green" :style=colorStyle[1]></div>
+          <div @click="changeColor('#909399',2)" class="gray" :style=colorStyle[2]></div>
+          <div @click="changeColor('#E6A23C',3)" class="orange" :style=colorStyle[3]></div>
+          <div @click="changeColor('black',4)" class="black" :style=colorStyle[4]></div>
+        </div>
       </div>
     </main>
   </div>
@@ -41,19 +52,23 @@ function debounce(func,wait){
 window.addEventListener('resize',debounce(function(){
   let canvas = document.getElementById('canvas')
   let canvasDiv = document.getElementById('canvasDiv')
-  // canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth;
-  // canvas.height = canvasDiv.offsetHeight > 50 ? canvasDiv.offsetHeight - 50 : canvasDiv.offsetHeight;
-  canvas.width = canvasDiv.offsetWidth;
-  canvas.height = canvasDiv.offsetHeight;
+  canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
+  canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
+  // canvas.width = canvasDiv.offsetWidth
+  // canvas.height = canvasDiv.offsetHeight
 },500),false)
 
 export default {
   data() {
     return {
       drawShow: 'none',
+      color: 'black',
+      colorStyle: [],
+      otherColor: 'black',
       connections: [],
       otherAddress: '',
       ctx: null,
+      otherctx: null,
       path: null,
       otherpath: null,
       tag: false,
@@ -70,42 +85,74 @@ export default {
       })
     },
     connectTo(address){
-      address = address.slice(0,-5)
-      this.otherAddress = address
+      if(this.drawShow === 'block'){
+        this.$confirm(`您确定要终止与 ${this.otherAddress} 的协作吗？`, '协作助手', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.exitDraw()
+        }).catch(()=>{
+          console.log('取消操作')
+        });
+      }else{
+        address = address.slice(0,-5)
+        ipc.send('notice-main', {
+          status: 'requestUser',
+          otherAddress: address
+        })
+      }
+    },
+    changeColor(color,index){
+      this.color = color
+      this.colorStyle = []
+      // this.colorStyle[index] = 'width:25px;height:25px;border:2px solid #B0B0B0;'
+      this.colorStyle[index] = `background:white;border:7px solid ${color};`
+    },
+    exitDraw(){
+      this.drawShow = 'none'
       ipc.send('notice-main', {
-        status: 'requestUser',
+        status: 'exitDraw',
         otherAddress: this.otherAddress
       })
+      this.otherAddress = ''
     },
     openDraw(){
       this.drawShow = 'block'
       let canvas = document.getElementById('canvas')
       let canvasDiv = document.getElementById('canvasDiv')
-      // canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth;
-      // canvas.height = canvasDiv.offsetHeight > 50 ? canvasDiv.offsetHeight - 50 : canvasDiv.offsetHeight;
-      canvas.width = canvasDiv.offsetWidth;
-      canvas.height = canvasDiv.offsetHeight;
+      canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
+      canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
+      // canvas.width = canvasDiv.offsetWidth - 50;
+      // canvas.height = canvasDiv.offsetHeight - 50;
       this.ctx = canvas.getContext("2d")
+      this.otherctx = canvas.getContext("2d")
       this.ctx.lineWidth = 3
-      this.path = new Path2D()
-      this.otherpath = new Path2D()
+      this.otherctx.lineWidth = 3
+      // this.path = new Path2D()
+      // this.otherpath = new Path2D()
     },
     start(e){
       let canvasDiv = document.getElementById('canvasDiv')
-      this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft;
-      this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop;
+      this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
+      this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
+      this.path = new Path2D()
+      this.ctx.strokeStyle = this.color
       this.path.moveTo(this.x,this.y)
       this.tag = true
     },
     otherStart(e){
+      this.otherColor = e.color
+      this.otherpath = new Path2D()
+      this.otherctx.strokeStyle = this.otherColor
       this.otherpath.moveTo(e.clientX,e.clientY)
       this.othertag = true
     },
     drawing(e){
       let canvasDiv = document.getElementById('canvasDiv')
       if(this.tag){
-        this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft;
-        this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop;
+        this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
+        this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
         this.path.lineTo(this.x,this.y)
         this.ctx.stroke(this.path)
       }
@@ -113,7 +160,7 @@ export default {
     otherDrawing(e){
       if(this.othertag){
         this.otherpath.lineTo(e.clientX,e.clientY)
-        this.ctx.stroke(this.otherpath)
+        this.otherctx.stroke(this.otherpath)
       }
     },
     stop(){
@@ -123,20 +170,21 @@ export default {
       this.othertag = false
     },
     sendStart(e){
-      let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft;
-      let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop;
+      let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
+      let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
       ipc.send('notice-main', {
         status: 'sendStart',
         otherAddress: this.otherAddress,
         e: {
           clientX: x,
-          clientY: y
+          clientY: y,
+          color: this.color
         }
       })
     },
     sendDrawing(e){
-      let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft;
-      let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop;
+      let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
+      let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
       ipc.send('notice-main', {
         status: 'sendDrawing',
         otherAddress: this.otherAddress,
@@ -157,14 +205,29 @@ export default {
     ipc.send('notice-main', {
       status: 'connect'
     })
+    
+    this.getConnections()
+
     ipc.on('notice-vice', (event, arg)=>{
       if(arg.status == 'getConnections'){
         console.log(arg.msg)
       }else if(arg.status == 'returnConnections'){
         console.log(arg.msg)
-        this.connections = arg.connections
-        this.$message.success('有新用户加入啦')
+        if(this.connections.length != arg.connections.length){
+          this.$message({
+            message: '用户列表更新啦',
+            type: 'success',
+            duration: 1500
+          })
+          this.connections = arg.connections
         // this.$set(this.connections,0,...arg.connections)
+        }else{
+          this.$message({
+            message: '似乎并没有新用户加入',
+            type: 'info',
+            duration: 1500
+          })
+        }
       }else if(arg.status == 'responseDraw'){
         let con = confirm(`${arg.otherAddress} 请求与您一同协作，是否同意？`)
         if(con){
@@ -200,14 +263,11 @@ export default {
         this.otherDrawing(arg.e)
       }else if(arg.status == 'otherStop'){
         this.otherStop()
+      }else if(arg.status == 'exitDraw'){
+        // console.log('对方终止了协作')
+        this.drawShow = 'none'
+        this.otherAddress = ''
       }
-      // else if(arg.status == 'start'){
-      //   this.start_2(arg.e)
-      // }else if(arg.status == 'stop'){
-      //   this.stop_2()
-      // }else if(arg.status == 'putPoint'){
-      //   this.putPoint_2(arg.e)
-      // }
     })
   }
 }
@@ -220,7 +280,9 @@ export default {
     min-height: 600px;
     display: flex;
     flex-direction: column;
+    background: #F8F8F8;
     .title{
+      padding: 15px 0;
       text-align: center;
       font-size: 30px;
       color: skyblue;
@@ -235,7 +297,11 @@ export default {
         padding: 20px;
         text-align: center;
         .user-title{
+          box-sizing: border-box;
+          border-top: 1px dashed black;
           margin: 15px 0;
+          padding-top: 5px;
+          text-align: left;
         }
         ul{
           overflow: auto;
@@ -243,16 +309,63 @@ export default {
       }
       .canvas{
         box-sizing: border-box;
-        width: 70%;
         position: relative;
+        width: 70%;
         z-index: 10;
-        canvas{
-          position: relative;
-          background: pink;
-          border-radius: 50px;
-          div{
-            position: absolute;
+        padding: 50px 25px;
+        .canvas-top{
+          position: absolute;
+          width: 100%;
+          height: 48px;
+          margin-left: -25px;
+          margin-top: -50px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          .canvas-tip{
+            margin-right: 15px;
           }
+        }
+        .canvas-tools{
+          position: absolute;
+          width: 100%;
+          height: 48px;
+          margin-left: -25px;
+          margin-bottom: -50px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          div{
+            box-sizing: border-box;
+            margin: 0 10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+          }
+          .red{
+            background: #F56C6C;
+          }
+          .green{
+            background: #67C23A;
+          }
+          .gray{
+            background: #909399;
+          }
+          .orange{
+            background: #E6A23C;
+          }
+          .black{
+            background: black;
+          }
+        }
+        canvas{
+          box-sizing: border-box;
+          position: relative;
+          background: white;
+          border: 1px solid skyblue;
+          border-radius: 50px;
+          cursor: crosshair;
         }
       }
     }
