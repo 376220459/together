@@ -71,8 +71,8 @@ server.on("listening",()=>{
 })
 
 server.on('message',(msg,rinfo)=>{
-    if(JSON.parse(msg).status == 'access'){
-    // if(JSON.parse(msg).status == 'access' && rinfo.address !== IPAddress){
+    // if(JSON.parse(msg).status == 'access'){
+    if(JSON.parse(msg).status == 'access' && rinfo.address !== IPAddress){
       if(connections.indexOf(rinfo.address + ':' + rinfo.port) == -1){
         connections.push(rinfo.address + ':' + rinfo.port)
         
