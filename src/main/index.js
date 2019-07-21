@@ -75,12 +75,17 @@ server.on('message',(msg,rinfo)=>{
     if(JSON.parse(msg).status == 'access' && rinfo.address !== IPAddress){
       if(connections.indexOf(rinfo.address + ':' + rinfo.port) == -1){
         connections.push(rinfo.address + ':' + rinfo.port)
+        
+        server.send(JSON.stringify({
+          status: 'access'
+        }),'8066',rinfo.address);
+        
+        me.send('notice-vice', {
+          status: 'returnConnections',//返回列表
+          msg: '返回列表',
+          connections: connections
+        })
       }
-      me.send('notice-vice', {
-        status: 'returnConnections',//返回列表
-        msg: '返回列表',
-        connections: connections
-      })
     // }else if(JSON.parse(msg).status == 'getConnections'){
     }else if(JSON.parse(msg).status == 'getConnections' && rinfo.address !== IPAddress){
       server.send(JSON.stringify({
