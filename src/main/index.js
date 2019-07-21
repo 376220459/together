@@ -79,15 +79,15 @@ server.on('message',(msg,rinfo)=>{
         server.send(JSON.stringify({
           status: 'access'
         }),'8066',rinfo.address);
-        
-        me.send('notice-vice', {
-          status: 'returnConnections',//返回列表
-          msg: '返回列表',
-          connections: connections
-        })
       }
+      me.send('notice-vice', {
+        status: 'returnConnections',//返回列表
+        msg: '返回列表',
+        connections: connections
+      })
     // }else if(JSON.parse(msg).status == 'getConnections'){
     }else if(JSON.parse(msg).status == 'getConnections' && rinfo.address !== IPAddress){
+      connections = [];
       server.send(JSON.stringify({
         status: 'access'
       }),'8066',rinfo.address);
