@@ -193,6 +193,12 @@ export default {
                 this.$message.warning(`${obj.otherAddress}拒绝了你的请求`)
                 this.otherAddress = ''
               }
+            }else if(obj.status == 'otherStart'){
+              this.otherStart(obj.e)
+            }else if(obj.status == 'otherDrawing'){
+              this.otherDrawing(obj.e)
+            }else if(obj.status == 'otherStop'){
+              this.otherStop()
             }
         }
         this.ws.onopen = ()=>{
@@ -378,7 +384,7 @@ export default {
       this.otherctx.beginPath()
       this.otherpath = new Path2D()
       this.otherctx.strokeStyle = this.otherColor
-      this.otherpath.moveTo(e.clientX-50,e.clientY-50)
+      this.otherpath.moveTo(e.clientX,e.clientY)
       this.othertag = true
     },
     drawing(e){
@@ -394,7 +400,7 @@ export default {
     otherDrawing(e){
       if(this.othertag){
         this.otherctx.strokeStyle = this.otherColor
-        this.otherpath.lineTo(e.clientX-50,e.clientY-50)
+        this.otherpath.lineTo(e.clientX,e.clientY)
         this.otherctx.stroke(this.otherpath)
       }
     },
@@ -407,33 +413,67 @@ export default {
     sendStart(e){
       let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
       let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
-      ipc.send('notice-main', {
-        status: 'sendStart',
-        otherAddress: this.otherAddress,
-        e: {
-          clientX: x,
-          clientY: y,
-          color: this.color
-        }
-      })
+      if(this.internet){
+        this.ws.send(JSON.stringify({
+            status: 'sendStart',
+            ip: this.ip,
+            otherAddress: this.otherAddress,
+            e: {
+              clientX: x,
+              clientY: y,
+              color: this.color
+            }
+        }));
+      }else{
+        ipc.send('notice-main', {
+          status: 'sendStart',
+          otherAddress: this.otherAddress,
+          e: {
+            clientX: x,
+            clientY: y,
+            color: this.color
+          }
+        })
+      }
     },
     sendDrawing(e){
       let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
       let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
-      ipc.send('notice-main', {
-        status: 'sendDrawing',
-        otherAddress: this.otherAddress,
-        e: {
-          clientX: x,
-          clientY: y
-        }
-      })
+      if(this.internet){
+        this.ws.send(JSON.stringify({
+            status: 'sendDrawing',
+            ip: this.ip,
+            otherAddress: this.otherAddress,
+            e: {
+              clientX: x,
+              clientY: y,
+              color: this.color
+            }
+        }));
+      }else{
+        ipc.send('notice-main', {
+          status: 'sendDrawing',
+          otherAddress: this.otherAddress,
+          e: {
+            clientX: x,
+            clientY: y
+          }
+        })
+      }
     },
     sendStop(){
-      ipc.send('notice-main', {
-        status: 'sendStop',
-        otherAddress: this.otherAddress
-      })
+      if(this.internet){
+        this.ws.send(JSON.stringify({
+            status: 'sendStop',
+            ip: this.ip,
+            otherAddress: this.otherAddress
+        }));
+      }else{
+        ipc.send('notice-main', {
+          status: 'sendStop',
+          otherAddress: this.otherAddress
+        })
+      }
     }
   },
   mounted() {

@@ -18,15 +18,15 @@ let server = ws.createServer(conn=>{
                     status: 'addNewHome',
                     homes: homes
                 }));
-                // server.connections.forEach(conn=>{
-                //     // console.log(conn.path.slice(5))
-                //     if(obj.ip === conn.path.slice(5)){
-                //         conn.sendText(JSON.stringify({
-                //             status: 'addNewHome',
-                //             homes: homes
-                //         }));
-                //     }
-                // });
+                server.connections.forEach(conn=>{
+                    // console.log(conn.path.slice(5))
+                    if(obj.ip !== conn.path.slice(5)){
+                        conn.sendText(JSON.stringify({
+                            status: 'getHomes',
+                            homes: homes
+                        }));
+                    }
+                });
             }
         }else if(obj.status == 'getHomes'){
             conn.sendText(JSON.stringify({
@@ -65,11 +65,27 @@ let server = ws.createServer(conn=>{
                 if(!homes[homeIndex].members.length){
                     homes.splice(homeIndex,1)
                 }
-                conn.sendText(JSON.stringify({
-                    status: 'getHomes',
-                    homes: homes
-                }));
+                server.connections.forEach(conn=>{
+                    conn.sendText(JSON.stringify({
+                        status: 'getHomes',
+                        homes: homes
+                    }));
+                })
             }
+        }else if(obj.status == 'sendStart'){
+            users[obj.otherAddress].sendText(JSON.stringify({
+                status: 'otherStart',
+                e: obj.e
+            }));
+        }else if(obj.status == 'sendDrawing'){
+            users[obj.otherAddress].sendText(JSON.stringify({
+                status: 'sendDrawing',
+                e: obj.e
+            }));
+        }else if(obj.status == 'sendStop'){
+            users[obj.otherAddress].sendText(JSON.stringify({
+                status: 'sendStop'
+            }));
         }
     })
     .on('close',()=>{
