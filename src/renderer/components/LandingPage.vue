@@ -152,6 +152,9 @@ export default {
         this.localnet = false
         this.internet = true
 
+        ipc.send('notice-main', {
+          status: 'close'
+        })
         ipc = null
         this.openInternet()
       }
