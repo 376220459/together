@@ -567,7 +567,7 @@ export default {
       // this.othertag = true
 
 
-
+      
       
       this.pens[e.ip].path = new Path2D()
       this.pens[e.ip].path.moveTo(e.clientX,e.clientY)
@@ -584,12 +584,14 @@ export default {
       }
     },
     otherDrawing(e){
-      if(this.othertag){
+      // if(this.othertag){
+      if(this.pens[e.ip].tag){
         // this.otherctx.strokeStyle = this.otherColor
         // this.otherpath.lineTo(e.clientX,e.clientY)
         // this.otherctx.stroke(this.otherpath)
 
 
+        // console.log(e)
         
         this.pens[e.ip].ctx.strokeStyle = e.color
         this.pens[e.ip].path.lineTo(e.clientX,e.clientY)
