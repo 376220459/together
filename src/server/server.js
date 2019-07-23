@@ -79,12 +79,16 @@ let server = ws.createServer(conn=>{
             }));
         }else if(obj.status == 'sendDrawing'){
             users[obj.otherAddress].sendText(JSON.stringify({
-                status: 'sendDrawing',
+                status: 'otherDrawing',
                 e: obj.e
             }));
         }else if(obj.status == 'sendStop'){
             users[obj.otherAddress].sendText(JSON.stringify({
-                status: 'sendStop'
+                status: 'otherStop'
+            }));
+        }else if(obj.status == 'exitDraw'){
+            users[obj.otherAddress].sendText(JSON.stringify({
+                status: 'exitDraw'
             }));
         }
     })

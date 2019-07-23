@@ -199,6 +199,10 @@ export default {
               this.otherDrawing(obj.e)
             }else if(obj.status == 'otherStop'){
               this.otherStop()
+            }else if(obj.status == 'exitDraw'){
+              this.$message.warning(`${this.otherAddress}终止了协作`)
+              this.drawShow = 'none'
+              this.otherAddress = ''
             }
         }
         this.ws.onopen = ()=>{
@@ -336,6 +340,11 @@ export default {
     exitDraw(){
       if(this.internet){
         this.drawShow = 'none'
+        this.ws.send(JSON.stringify({
+            status: 'exitDraw',
+            ip: this.ip,
+            otherAddress: this.otherAddress
+        }));
         // ipc.send('notice-main', {
         //   status: 'exitDraw',
         //   otherAddress: this.otherAddress
