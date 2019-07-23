@@ -54,6 +54,8 @@ const ipc = require('electron').ipcMain
 let me;//me代表自己（ipc）
 let connections = [];//存放连接用户
 let dgram,server,multicastAddr
+let homes = []
+let currentHome = null
 function openLocalnet(){
   dgram = require('dgram'),
   server = dgram.createSocket("udp4"),
@@ -74,8 +76,9 @@ function openLocalnet(){
   })
 
   server.on('message',(msg,rinfo)=>{
-      // if(JSON.parse(msg).status == 'access'){
-      if(JSON.parse(msg).status == 'access' && rinfo.address !== IPAddress){
+      msg = JSON.parse(msg)
+      // if(msg.status == 'access'){
+      if(msg.status == 'access' && rinfo.address !== IPAddress){
         if(connections.indexOf(rinfo.address + ':' + rinfo.port) == -1){
           connections.push(rinfo.address + ':' + rinfo.port)
           
@@ -88,19 +91,19 @@ function openLocalnet(){
           msg: '返回列表',
           connections: connections
         })
-      // }else if(JSON.parse(msg).status == 'getConnections'){
-      }else if(JSON.parse(msg).status == 'getConnections' && rinfo.address !== IPAddress){
+      // }else if(msg.status == 'getConnections'){
+      }else if(msg.status == 'getConnections' && rinfo.address !== IPAddress){
         server.send(JSON.stringify({
           status: 'access'
         }),'8066',rinfo.address);
-      }else if(JSON.parse(msg).status == 'requestUser'){
+      }else if(msg.status == 'requestUser'){
         me.send('notice-vice', {
           status: 'responseDraw',//响应请求
           msg: '响应请求',
           otherAddress: rinfo.address
         })
-      }else if(JSON.parse(msg).status == 'responseUser'){
-        if(JSON.parse(msg).agree == 'yes'){
+      }else if(msg.status == 'responseUser'){
+        if(msg.agree == 'yes'){
           me.send('notice-vice', {
             status: 'responseUser',
             agree: 'yes',
@@ -113,23 +116,50 @@ function openLocalnet(){
             otherAddress: rinfo.address
           })
         }
-      }else if(JSON.parse(msg).status == 'otherStart'){
+      }else if(msg.status == 'otherStart'){
         me.send('notice-vice', {
           status: 'otherStart',
-          e: JSON.parse(msg).e
+          e: msg.e
         })
-      }else if(JSON.parse(msg).status == 'otherDrawing'){
+      }else if(msg.status == 'otherDrawing'){
         me.send('notice-vice', {
           status: 'otherDrawing',
-          e: JSON.parse(msg).e
+          e: msg.e
         })
-      }else if(JSON.parse(msg).status == 'otherStop'){
+      }else if(msg.status == 'otherStop'){
         me.send('notice-vice', {
           status: 'otherStop'
         })
-      }else if(JSON.parse(msg).status == 'exitDraw'){
+      }else if(msg.status == 'exitDraw'){
         me.send('notice-vice', {
           status: 'exitDraw'
+        })
+      }else if(msg.status == 'getHomes'){
+        if(currentHome){
+          server.send(JSON.stringify({
+            status: 'putHome',
+            home: currentHome
+          }),'8066',rinfo.address);
+        }
+      }else if(msg.status == 'putHome'){
+        if(homes.map(e=>e.homeName).indexOf(msg.home) === -1){
+          homes.push(msg.home)
+          me.send('notice-vice', {
+            status: 'getHomes',
+            homes: homes
+          })
+        }
+      }else if(msg.status == 'addNewHome'){
+        homes.push(msg.home)
+        me.send('notice-vice', {
+          status: 'addNewHome',
+          homes: homes
+        })
+      }else if(msg.status == 'homeChanged'){
+        homes = msg.homes
+        me.send('notice-vice', {
+          status: 'getHomes',
+          homes: homes
         })
       }
   })
@@ -196,5 +226,66 @@ ipc.on('notice-main',(event, arg)=>{
     })
   }else if(arg.status == 'openLocalnet'){
     openLocalnet()
+  }else if(arg.status == 'getHomes'){
+    server.send(JSON.stringify({
+      status: 'getHomes'
+    }),'8066',multicastAddr)
+  }else if(arg.status == 'addNewHome'){
+    if(homes.map(e=>e.homeName).indexOf(arg.homeName) === -1){
+        homes.push({
+            homeName: arg.homeName,
+            members: [IPAddress]
+        })
+        
+        server.send(JSON.stringify({
+          status: 'homeChanged',
+          homes: homes
+        }),'8066',multicastAddr)
+
+        me.send('notice-ip', {
+          status: 'addNewHome',
+          homes: homes
+        })
+    }
+
+
+    // currentHome = {
+    //   homeName: arg.homeName,
+    //   members: [IPAddress]
+    // }
+    // homes.push(currentHome)
+    // server.send(JSON.stringify({
+    //   status: 'addNewHome',
+    //   home: currentHome
+    // }),'8066',multicastAddr)
+  }else if(arg.status == 'enterHome'){
+    currentHome = {
+      homeName: arg.homeName,
+      members: [IPAddress]
+    }
+
+    let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
+
+    if(homes[homeIndex].members.indexOf(IPAddress) === -1){
+      homes[homeIndex].members.push(IPAddress)
+      server.send(JSON.stringify({
+        status: 'homeChanged',
+        homes: homes
+      }),'8066',multicastAddr)
+    }
+  }else if(arg.status == 'exitHome'){
+    currentHome = null
+    let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
+    let memberIndex = homes[homeIndex].members.indexOf(IPAddress)
+    if(memberIndex !== -1){
+        homes[homeIndex].members.splice(memberIndex,1)
+        if(!homes[homeIndex].members.length){
+            homes.splice(homeIndex,1)
+        }
+        server.send(JSON.stringify({
+          status: 'homeChanged',
+          homes: homes
+        }),'8066',multicastAddr)
+    }
   }
 })

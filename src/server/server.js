@@ -73,19 +73,46 @@ let server = ws.createServer(conn=>{
                 })
             }
         }else if(obj.status == 'sendStart'){
-            users[obj.otherAddress].sendText(JSON.stringify({
-                status: 'otherStart',
-                e: obj.e
-            }));
+            let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
+            homes[homeIndex].members.forEach(e=>{
+                if(e !== obj.ip){
+                    users[e].sendText(JSON.stringify({
+                        status: 'otherStart',
+                        e: obj.e
+                    }));
+                }
+            })
+            // users[obj.otherAddress].sendText(JSON.stringify({
+            //     status: 'otherStart',
+            //     e: obj.e
+            // }));
         }else if(obj.status == 'sendDrawing'){
-            users[obj.otherAddress].sendText(JSON.stringify({
-                status: 'otherDrawing',
-                e: obj.e
-            }));
+            let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
+            homes[homeIndex].members.forEach(e=>{
+                if(e !== obj.ip){
+                    users[e].sendText(JSON.stringify({
+                        status: 'otherDrawing',
+                        e: obj.e
+                    }));
+                }
+            })
+            // users[obj.otherAddress].sendText(JSON.stringify({
+            //     status: 'otherDrawing',
+            //     e: obj.e
+            // }));
         }else if(obj.status == 'sendStop'){
-            users[obj.otherAddress].sendText(JSON.stringify({
-                status: 'otherStop'
-            }));
+            let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
+            homes[homeIndex].members.forEach(e=>{
+                if(e !== obj.ip){
+                    users[e].sendText(JSON.stringify({
+                        status: 'otherStop',
+                        e: obj.e
+                    }));
+                }
+            })
+            // users[obj.otherAddress].sendText(JSON.stringify({
+            //     status: 'otherStop'
+            // }));
         }else if(obj.status == 'exitDraw'){
             users[obj.otherAddress].sendText(JSON.stringify({
                 status: 'exitDraw'
