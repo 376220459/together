@@ -29,10 +29,12 @@
 
       <div class="internet" v-if="internet && this.currentHome == '' ? true : false">
         <i class="el-icon-plus" title="创建房间" @click="openCreateHome"></i>
-        <el-button class="get-button" type="primary" round @click="getHomes">刷新房间列表</el-button>
+        <el-button class="change-net" icon="el-icon-sort" circle @click="changeNet" title="切换网络"></el-button>
+        <el-button class="get-button" type="primary" round @click="getHomes" plain>刷新公网房间列表</el-button>
+        <!-- <el-button class="get-button" type="primary" icon="el-icon-refresh" circle @click="getHomes"></el-button> -->
         <ul>
           <li class="home-item" v-for="(item, index) in homes" :key="index">
-            <div style="cursor: pointer;">房间{{ index + 1 }}：{{ item.homeName }}({{ item.members.length }}人)</div>
+            <div style="cursor: pointer;">||房间{{ index + 1 }}：{{ item.homeName }}({{ item.members.length }}人)</div>
             <!-- <ul v-if="item.open">
               <li class="member" v-for="(item2, index2) in item.members" :key="index2">
                 <div>{{ item2 }}</div>
@@ -45,7 +47,8 @@
       </div>
 
       <div class="localnet" v-if="localnet && this.currentHome == '' ? true : false">
-        <el-button class="get-button" @click="getConnections" type="primary" round>刷新用户列表</el-button>
+        <el-button class="change-net" icon="el-icon-sort" circle @click="changeNet" title="切换网络"></el-button>
+        <el-button class="get-button" @click="getConnections" type="primary" round plain>刷新内网房间列表</el-button>
         <div class="user-title">用户列表:</div>
         <ul>
           <li v-for="(item, index) in connections" :key="index">
@@ -75,7 +78,7 @@
 </template>
 
 <script>
-const ipc = require('electron').ipcRenderer
+let ipc = require('electron').ipcRenderer
 
 function debounce(func,wait){
   let id = null;
@@ -105,6 +108,7 @@ window.addEventListener('resize',debounce(function(){
 export default {
   data() {
     return {
+      localnetOpened: false,
       ws: null,
       internet: false,
       localnet: false,
@@ -131,6 +135,27 @@ export default {
     }
   },
   methods: {
+    changeNet(){
+      if(this.internet){
+        if(this.otherAddress){
+          this.exitDraw()
+        }
+        this.internet = false
+        this.localnet = true
+
+        this.ws.close()
+        this.openLocalnet()
+      }else{
+        if(this.otherAddress){
+          this.exitDraw()
+        }
+        this.localnet = false
+        this.internet = true
+
+        ipc = null
+        this.openInternet()
+      }
+    },
     getHomes(){
       if(this.internet){
         this.ws.send(JSON.stringify({
@@ -139,7 +164,7 @@ export default {
         }));
       }
     },
-    openIntnet(){
+    openInternet(){
         this.ws = new WebSocket(`ws://192.168.1.196:8888?ip=${this.ip}`)
         // this.ws = new WebSocket(`ws://192.168.16.102:8888?ip=${this.ip}`)
         this.ws.onmessage = e=>{
@@ -218,8 +243,101 @@ export default {
         }
         this.ws.onclose = ()=>{
             console.log('ws通道已关闭');
-            this.openIntnet()
+            // this.openInternet()
         }
+    },
+    openLocalnet(){
+      if(this.localnetOpened){
+        ipc = require('electron').ipcRenderer
+
+        ipc.send('notice-main', {
+          status: 'connect'
+        })
+        
+        this.getConnections()
+        return
+      }
+      this.localnetOpened = true
+
+      ipc.send('notice-main', {
+        status: 'openLocalnet'
+      })
+      
+      ipc.send('notice-main', {
+        status: 'connect'
+      })
+      
+      this.getConnections()
+
+      ipc.on('notice-vice', (event, arg)=>{
+        if(arg.status == 'getConnections'){
+          console.log(arg.msg)
+        }else if(arg.status == 'returnConnections'){
+          console.log(arg.msg)
+          if(this.connections.join('') != arg.connections.join('')){
+            this.$message({
+              message: '用户列表更新啦',
+              type: 'success',
+              duration: 1500
+            })
+            this.connections = arg.connections
+          // this.$set(this.connections,0,...arg.connections)
+          }else{
+            this.$message({
+              message: '似乎并没有新用户加入',
+              type: 'info',
+              duration: 1500
+            })
+          }
+        }else if(arg.status == 'responseDraw'){
+          this.$confirm(`${arg.otherAddress} 请求与您一同协作，是否同意？`, '协作助手', {
+            confirmButtonText: '同意',
+            cancelButtonText: '拒绝',
+            type: 'warning'
+          }).then(() => {
+            console.log('同意对方的请求')
+            this.openDraw();
+            this.otherAddress = arg.otherAddress
+            ipc.send('notice-main', {
+              status: 'agreeUser',
+              agree: 'yes',
+              otherAddress: arg.otherAddress
+            })
+          }).catch(()=>{
+            console.log('拒绝对方的请求')
+            ipc.send('notice-main', {
+              status: 'agreeUser',
+              agree: 'no',
+              otherAddress: arg.otherAddress
+            })
+          });
+        }else if(arg.status == 'responseUser'){
+          if(arg.agree == 'yes'){
+            console.log(`${arg.otherAddress}同意了你的请求`)
+            this.$message.success(`成功与${arg.otherAddress}建立连接`)
+            this.openDraw();
+            this.otherAddress = arg.otherAddress
+          }else{
+            console.log(`${arg.otherAddress}拒绝了你的请求`)
+            this.$message.warning(`${arg.otherAddress}拒绝了你的请求`)
+            this.otherAddress = ''
+          }
+        }else if(arg.status == 'otherStart'){
+          this.otherStart(arg.e)
+        }else if(arg.status == 'otherDrawing'){
+          this.otherDrawing(arg.e)
+        }else if(arg.status == 'otherStop'){
+          this.otherStop()
+        }else if(arg.status == 'exitDraw'){
+          // console.log('对方终止了协作')
+          this.$message.warning(`${this.otherAddress}终止了协作`)
+          this.drawShow = 'none'
+          this.otherAddress = ''
+        }else if(arg.status == 'getIP'){
+          this.ip = arg.ip
+          // console.log(this.ip)
+        }
+      })
     },
     openCreateHome(){
       this.createHomeIf = true
@@ -236,7 +354,11 @@ export default {
     createInternetHome(){
       this.newHomeName = this.newHomeName.trim()
       if(this.newHomeName && this.homes.map(e=>e.homeName).indexOf(this.newHomeName) === -1){
-        this.$message.success('创建成功')
+        this.$message({
+          type: 'success',
+          message: '创建成功',
+          duration: 1000
+        })
         this.ws.send(JSON.stringify({
             status: 'addNewHome',
             homeName: this.newHomeName,
@@ -276,9 +398,10 @@ export default {
     selectNet(net){
       if(net === 'internet'){
         this.internet = true
-        this.openIntnet()
+        this.openInternet()
       }else{
         this.localnet = true
+        this.openLocalnet()
       }
     },
     getConnections(){
@@ -288,6 +411,14 @@ export default {
       })
     },
     connectTo(address){
+      if(address === this.ip){
+        this.$message({
+          type: 'warning',
+          message: '不能选择自己哦',
+          duration: 1000
+        })
+        return
+      }
       if(this.internet){
         if(this.drawShow === 'block'){
           this.$confirm(`您确定要终止与 ${this.otherAddress} 的协作吗？`, '协作助手', {
@@ -486,85 +617,85 @@ export default {
     }
   },
   mounted() {
-    ipc.send('notice-main', {
-      status: 'connect'
-    })
+    // ipc.send('notice-main', {
+    //   status: 'connect'
+    // })
     
-    this.getConnections()
+    // this.getConnections()
 
     ipc.send('notice-main', {
       status: 'getIP'
     })
 
-    ipc.on('notice-vice', (event, arg)=>{
-      if(arg.status == 'getConnections'){
-        console.log(arg.msg)
-      }else if(arg.status == 'returnConnections'){
-        console.log(arg.msg)
-        if(this.connections.join('') != arg.connections.join('')){
-          this.$message({
-            message: '用户列表更新啦',
-            type: 'success',
-            duration: 1500
-          })
-          this.connections = arg.connections
-        // this.$set(this.connections,0,...arg.connections)
-        }else{
-          this.$message({
-            message: '似乎并没有新用户加入',
-            type: 'info',
-            duration: 1500
-          })
-        }
-      }else if(arg.status == 'responseDraw'){
-        this.$confirm(`${arg.otherAddress} 请求与您一同协作，是否同意？`, '协作助手', {
-          confirmButtonText: '同意',
-          cancelButtonText: '拒绝',
-          type: 'warning'
-        }).then(() => {
-          console.log('同意对方的请求')
-          this.openDraw();
-          this.otherAddress = arg.otherAddress
-          ipc.send('notice-main', {
-            status: 'agreeUser',
-            agree: 'yes',
-            otherAddress: arg.otherAddress
-          })
-        }).catch(()=>{
-          console.log('拒绝对方的请求')
-          ipc.send('notice-main', {
-            status: 'agreeUser',
-            agree: 'no',
-            otherAddress: arg.otherAddress
-          })
-        });
-      }else if(arg.status == 'responseUser'){
-        if(arg.agree == 'yes'){
-          console.log(`${arg.otherAddress}同意了你的请求`)
-          this.$message.success(`成功与${arg.otherAddress}建立连接`)
-          this.openDraw();
-          this.otherAddress = arg.otherAddress
-        }else{
-          console.log(`${arg.otherAddress}拒绝了你的请求`)
-          this.$message.warning(`${arg.otherAddress}拒绝了你的请求`)
-          this.otherAddress = ''
-        }
-      }else if(arg.status == 'otherStart'){
-        this.otherStart(arg.e)
-      }else if(arg.status == 'otherDrawing'){
-        this.otherDrawing(arg.e)
-      }else if(arg.status == 'otherStop'){
-        this.otherStop()
-      }else if(arg.status == 'exitDraw'){
-        // console.log('对方终止了协作')
-        this.$message.warning(`${this.otherAddress}终止了协作`)
-        this.drawShow = 'none'
-        this.otherAddress = ''
-      }else if(arg.status == 'getIP'){
-        this.ip = arg.ip
-        // console.log(this.ip)
-      }
-    })
+    // ipc.on('notice-vice', (event, arg)=>{
+    //   if(arg.status == 'getConnections'){
+    //     console.log(arg.msg)
+    //   }else if(arg.status == 'returnConnections'){
+    //     console.log(arg.msg)
+    //     if(this.connections.join('') != arg.connections.join('')){
+    //       this.$message({
+    //         message: '用户列表更新啦',
+    //         type: 'success',
+    //         duration: 1500
+    //       })
+    //       this.connections = arg.connections
+    //     // this.$set(this.connections,0,...arg.connections)
+    //     }else{
+    //       this.$message({
+    //         message: '似乎并没有新用户加入',
+    //         type: 'info',
+    //         duration: 1500
+    //       })
+    //     }
+    //   }else if(arg.status == 'responseDraw'){
+    //     this.$confirm(`${arg.otherAddress} 请求与您一同协作，是否同意？`, '协作助手', {
+    //       confirmButtonText: '同意',
+    //       cancelButtonText: '拒绝',
+    //       type: 'warning'
+    //     }).then(() => {
+    //       console.log('同意对方的请求')
+    //       this.openDraw();
+    //       this.otherAddress = arg.otherAddress
+    //       ipc.send('notice-main', {
+    //         status: 'agreeUser',
+    //         agree: 'yes',
+    //         otherAddress: arg.otherAddress
+    //       })
+    //     }).catch(()=>{
+    //       console.log('拒绝对方的请求')
+    //       ipc.send('notice-main', {
+    //         status: 'agreeUser',
+    //         agree: 'no',
+    //         otherAddress: arg.otherAddress
+    //       })
+    //     });
+    //   }else if(arg.status == 'responseUser'){
+    //     if(arg.agree == 'yes'){
+    //       console.log(`${arg.otherAddress}同意了你的请求`)
+    //       this.$message.success(`成功与${arg.otherAddress}建立连接`)
+    //       this.openDraw();
+    //       this.otherAddress = arg.otherAddress
+    //     }else{
+    //       console.log(`${arg.otherAddress}拒绝了你的请求`)
+    //       this.$message.warning(`${arg.otherAddress}拒绝了你的请求`)
+    //       this.otherAddress = ''
+    //     }
+    //   }else if(arg.status == 'otherStart'){
+    //     this.otherStart(arg.e)
+    //   }else if(arg.status == 'otherDrawing'){
+    //     this.otherDrawing(arg.e)
+    //   }else if(arg.status == 'otherStop'){
+    //     this.otherStop()
+    //   }else if(arg.status == 'exitDraw'){
+    //     // console.log('对方终止了协作')
+    //     this.$message.warning(`${this.otherAddress}终止了协作`)
+    //     this.drawShow = 'none'
+    //     this.otherAddress = ''
+    //   }else if(arg.status == 'getIP'){
+    //     this.ip = arg.ip
+    //     // console.log(this.ip)
+    //   }
+    // })
   }
 }
 </script>
@@ -664,11 +795,17 @@ export default {
         // border-right: 1px dotted black;
         // padding: 20px;
         // text-align: center;
+        .change-net{
+          position: absolute;
+          top: 5px;
+          left: 5px;
+          cursor: pointer;
+        }
         .el-icon-plus{
           position: absolute;
           top: 5px;
           right: 5px;
-          color: skyblue;
+          color: #409EFF;
           font-size: 30px;
           cursor: pointer;
         }
@@ -701,6 +838,12 @@ export default {
         // border-right: 1px dotted black;
         // padding: 20px;
         // text-align: center;
+        .change-net{
+          position: absolute;
+          top: 5px;
+          left: 5px;
+          cursor: pointer;
+        }
         .user-title{
           box-sizing: border-box;
           border-top: 1px dashed black;
