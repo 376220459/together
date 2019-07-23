@@ -190,7 +190,7 @@ ipc.on('notice-main',(event, arg)=>{
     }),'8066',arg.otherAddress)
   }else if(arg.status == 'getIP'){
     me = event.sender
-    me.send('notice-vice', {
+    me.send('notice-ip', {
       status: 'getIP',//正在获取列表...
       ip: IPAddress
     })

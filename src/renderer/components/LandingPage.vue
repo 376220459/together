@@ -78,7 +78,7 @@
 </template>
 
 <script>
-let ipc = require('electron').ipcRenderer
+const ipc = require('electron').ipcRenderer
 
 function debounce(func,wait){
   let id = null;
@@ -326,9 +326,6 @@ export default {
           this.$message.warning(`${this.otherAddress}终止了协作`)
           this.drawShow = 'none'
           this.otherAddress = ''
-        }else if(arg.status == 'getIP'){
-          this.ip = arg.ip
-          // console.log(this.ip)
         }
       })
     },
@@ -618,6 +615,12 @@ export default {
 
     ipc.send('notice-main', {
       status: 'getIP'
+    })
+    
+    ipc.on('notice-ip', (event, arg)=>{
+      if(arg.status == 'getIP'){
+        this.ip = arg.ip
+      }
     })
 
     // ipc.on('notice-vice', (event, arg)=>{
