@@ -418,6 +418,7 @@ export default {
       }
       this.currentHome = ''
       this.currentHomeIndex = ''
+      this.exitDraw()
     },
     selectNet(net){
       if(net === 'internet'){
@@ -495,15 +496,11 @@ export default {
     exitDraw(){
       if(this.internet){
         this.drawShow = 'none'
-        this.ws.send(JSON.stringify({
-            status: 'exitDraw',
-            ip: this.ip,
-            otherAddress: this.otherAddress
-        }));
-        // ipc.send('notice-main', {
-        //   status: 'exitDraw',
-        //   otherAddress: this.otherAddress
-        // })
+        // this.ws.send(JSON.stringify({
+        //     status: 'exitDraw',
+        //     ip: this.ip,
+        //     otherAddress: this.otherAddress
+        // }));
         this.otherAddress = ''
       }else{
         this.drawShow = 'none'
