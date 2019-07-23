@@ -50,10 +50,12 @@ let server = ws.createServer(conn=>{
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
             if(homes[homeIndex].members.indexOf(obj.ip) === -1){
                 homes[homeIndex].members.push(obj.ip)
-                conn.sendText(JSON.stringify({
-                    status: 'getHomes',
-                    homes: homes
-                }));
+                server.connections.forEach(conn=>{
+                    conn.sendText(JSON.stringify({
+                        status: 'getHomes',
+                        homes: homes
+                    }));
+                })
             }
         }else if(obj.status == 'exitHome'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
