@@ -152,10 +152,8 @@ export default {
         this.localnet = false
         this.internet = true
 
-        ipc.send('notice-main', {
-          status: 'close'
-        })
-        ipc = null
+        // ipc = null
+        ipc.removeAllListeners('notice-vice')
         this.openInternet()
       }
     },
@@ -250,21 +248,13 @@ export default {
         }
     },
     openLocalnet(){
-      if(this.localnetOpened){
-        ipc = require('electron').ipcRenderer
+      if(!this.localnetOpened){
+        this.localnetOpened = true
 
         ipc.send('notice-main', {
-          status: 'connect'
+          status: 'openLocalnet'
         })
-        
-        this.getConnections()
-        return
       }
-      this.localnetOpened = true
-
-      ipc.send('notice-main', {
-        status: 'openLocalnet'
-      })
       
       ipc.send('notice-main', {
         status: 'connect'

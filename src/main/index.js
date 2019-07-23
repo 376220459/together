@@ -50,7 +50,7 @@ for(var devName in interfaces){
   }  
 }
 
-let ipc = require('electron').ipcMain
+const ipc = require('electron').ipcMain
 let me;//me代表自己（ipc）
 let connections = [];//存放连接用户
 let dgram,server,multicastAddr
@@ -139,7 +139,6 @@ function openLocalnet(){
 
 ipc.on('notice-main',(event, arg)=>{
   if(arg.status == 'connect'){
-    ipc = require('electron').ipcMain
     me = event.sender
     server.send(JSON.stringify({
       status: 'access'
@@ -197,7 +196,5 @@ ipc.on('notice-main',(event, arg)=>{
     })
   }else if(arg.status == 'openLocalnet'){
     openLocalnet()
-  }else if(arg.status == 'close'){
-    ipc = null
   }
 })
