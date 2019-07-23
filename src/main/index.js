@@ -184,5 +184,10 @@ ipc.on('notice-main',(event, arg)=>{
     server.send(JSON.stringify({
       status: 'exitDraw'
     }),'8066',arg.otherAddress)
+  }else if(arg.status == 'getIP'){
+    me.send('notice-vice', {
+      status: 'getIP',//正在获取列表...
+      ip: IPAddress
+    })
   }
 })
