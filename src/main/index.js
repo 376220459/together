@@ -156,7 +156,8 @@ function openLocalnet(){
           me.send('notice-vice', {
             status: 'createHome',
             homes: homes,
-            newHomeName: msg.home.homeName
+            newHomeName: msg.home.homeName,
+            changedHome: msg.home
           })
         }else{
           homes.push(msg.home)
@@ -199,7 +200,8 @@ function openLocalnet(){
           me.send('notice-vice', {
             status: 'enterHome',
             homes: homes,
-            enterHomeName: msg.homeName
+            enterHomeName: msg.homeName,
+            changedHome: homes[homeIndex]
           })
         }else{
           let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)

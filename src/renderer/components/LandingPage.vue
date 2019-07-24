@@ -353,9 +353,10 @@ export default {
           // this.$set(this.homes,0,...arg.homes)
           console.log('房间列表更新')
         }else if(arg.status == 'createHome'){
-          this.homes = arg.homes
+          // this.homes = arg.homes
+          this.homes.push(arg.changedHome)
           this.currentHome = arg.newHomeName
-          this.currentHomeIndex = arg.homes.map(e=>e.homeName).indexOf(arg.newHomeName)
+          this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
           this.openDraw()
           
           // console.log('创建'+this.homes.map(e=>e.homeName))
@@ -370,9 +371,11 @@ export default {
           // console.log(this.homes.map(e=>e.homeName))
         }else if(arg.status == 'enterHome'){
           // console.log(arg.enterHomeName)
-          this.homes = arg.homes
+          // this.homes = arg.homes
+          let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.changedHome.homeName)
+          this.$set(this.homes,homeIndex,arg.changedHome)
           this.currentHome = arg.enterHomeName
-          this.currentHomeIndex = arg.homes.map(e=>e.homeName).indexOf(arg.enterHomeName)
+          this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
           this.openDraw()
         }else if(arg.status == 'deleteHome'){
           let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.deleteHomeName)
