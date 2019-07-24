@@ -376,6 +376,9 @@ export default {
           this.openDraw()
         }else if(arg.status == 'deleteHome'){
           let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.deleteHomeName)
+          if(homeIndex < this.currentHomeIndex){
+            this.currentHomeIndex--
+          }
           this.homes.splice(homeIndex,1)
           console.log('有房间被删除')
         }
