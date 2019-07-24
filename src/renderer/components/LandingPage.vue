@@ -407,11 +407,11 @@ export default {
       }
     },
     enterHome(item,index){
-      this.currentHomeIndex = index
-      this.currentHome = item
       // console.log(this.currentHome)
       this.openDraw()
       if(this.internet){
+        this.currentHomeIndex = index
+        this.currentHome = item
         this.ws.send(JSON.stringify({
             status: 'enterHome',
             homeName: this.currentHome,
@@ -420,7 +420,7 @@ export default {
       }else{
         ipc.send('notice-main', {
           status: 'enterHome',
-          homeName: this.currentHome
+          homeName: item
         })
       }
     },
