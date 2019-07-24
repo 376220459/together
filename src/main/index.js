@@ -149,12 +149,28 @@ function openLocalnet(){
             homes: homes
           })
         }
-      }else if(msg.status == 'addNewHome'){
-        homes.push(msg.home)
-        me.send('notice-vice', {
-          status: 'addNewHome',
-          homes: homes
-        })
+      }else if(msg.status == 'createHome'){
+        if(rinfo.address === IPAddress){
+          currentHome = msg.home
+          homes.push(msg.home)
+          me.send('notice-vice', {
+            status: 'createHome',
+            homes: homes,
+            newHomeName: msg.home.homeName
+          })
+        }else{
+          homes.push(msg.home)
+          me.send('notice-vice', {
+            status: 'updateHomes',
+            homes: homes
+          })
+        }
+
+        // homes.push(msg.home)
+        // me.send('notice-vice', {
+        //   status: 'addNewHome',
+        //   homes: homes
+        // })
       }else if(msg.status == 'homeChanged'){
         // homes = msg.homes
         let homeIndex = homes.map(e=>e.homeName).indexOf(msg.home.homeName)
@@ -243,27 +259,37 @@ ipc.on('notice-main',(event, arg)=>{
     server.send(JSON.stringify({
       status: 'getHomes'
     }),'8066',multicastAddr)
-  }else if(arg.status == 'addNewHome'){
-    if(homes.map(e=>e.homeName).indexOf(arg.homeName) === -1){
-        homes.push({
-            homeName: arg.homeName,
-            members: [IPAddress]
-        })
-        
-        server.send(JSON.stringify({
-          status: 'homeChanged',
-          // homes: homes
-          home: {
-              homeName: arg.homeName,
-              members: [IPAddress]
-          }
-        }),'8066',multicastAddr)
+  }else if(arg.status == 'createHome'){
+    server.send(JSON.stringify({
+      status: 'createHome',
+      home: {
+        homeName: arg.homeName,
+        members: [IPAddress]
+      }
+    }),'8066',multicastAddr)
 
-        me.send('notice-vice', {
-          status: 'addNewHome',
-          homes: homes
-        })
-    }
+
+
+    // if(homes.map(e=>e.homeName).indexOf(arg.homeName) === -1){
+    //     homes.push({
+    //         homeName: arg.homeName,
+    //         members: [IPAddress]
+    //     })
+        
+    //     server.send(JSON.stringify({
+    //       status: 'homeChanged',
+    //       // homes: homes
+    //       home: {
+    //           homeName: arg.homeName,
+    //           members: [IPAddress]
+    //       }
+    //     }),'8066',multicastAddr)
+
+    //     me.send('notice-vice', {
+    //       status: 'addNewHome',
+    //       homes: homes
+    //     })
+    // }
 
 
     // currentHome = {
@@ -294,7 +320,10 @@ ipc.on('notice-main',(event, arg)=>{
     }),'8066',multicastAddr)
   }else if(arg.status == 'exitHome'){
     let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
-    let memberIndex = homes[homeIndex].members.indexOf(IPAddress)
+    let memberIndex = -1
+    if(homeIndex !== -1){
+      memberIndex = homes[homeIndex].members.indexOf(IPAddress)
+    }
     if(memberIndex !== -1){
         homes[homeIndex].members.splice(memberIndex,1)
         let home2 = homes[homeIndex]

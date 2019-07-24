@@ -351,10 +351,15 @@ export default {
           // this.homes = []
           // this.$set(this.homes,0,...arg.homes)
           console.log('房间列表更新')
-        }else if(arg.status == 'addNewHome'){
+        }else if(arg.status == 'createHome'){
           this.homes = arg.homes
-          console.log(this.homes[this.homes.length - 1])
-          this.enterHome(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
+          this.currentHome = arg.newHomeName
+          this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
+          // console.log(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
+          // this.enterHome(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
+        }else if(arg.status == 'updateHomes'){
+          this.homes = arg.homes
+          console.log('房间列表更新')
         }
       })
     },
@@ -390,7 +395,7 @@ export default {
           duration: 1000
         })
         ipc.send('notice-main', {
-          status: 'addNewHome',
+          status: 'createHome',
           homeName: this.newHomeName
         })
         this.closeCreateHome()
