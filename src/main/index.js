@@ -424,12 +424,24 @@ ipc.on('notice-main',(event, arg)=>{
     //   home: currentHome
     // }),'8066',multicastAddr)
   }else if(arg.status == 'enterHome'){
-    // let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
-    server.send(JSON.stringify({
+    homes[homes.map(e=>e.homeName).indexOf(arg.homeName)].members.push(IPAddress)
+    
+    me.send('notice-vice', {
       status: 'enterHome',
-      homeName: arg.homeName,
-      ip: IPAddress
+      homes: homes
+    })
+    server.send(JSON.stringify({
+      status: 'updateHomes',
+      homes: homes
     }),'8066',multicastAddr)
+
+
+
+    // server.send(JSON.stringify({
+    //   status: 'enterHome',
+    //   homeName: arg.homeName,
+    //   ip: IPAddress
+    // }),'8066',multicastAddr)
 
 
     // if(homes[homeIndex].members.indexOf(IPAddress) === -1){

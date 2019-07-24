@@ -388,13 +388,17 @@ export default {
           // this.$set(this.homes,homeIndex,arg.changedHome)
           // console.log('房间列表更新')
         }else if(arg.status == 'enterHome'){
-          // console.log(arg.enterHomeName)
-          // this.homes = arg.homes
-          let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.changedHome.homeName)
-          this.$set(this.homes,homeIndex,arg.changedHome)
-          this.currentHome = arg.enterHomeName
-          this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
+          this.homes = arg.homes
+          this.currentHome = this.homes[this.homes.length - 1].homeName
           this.openDraw()
+
+
+
+          // let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.changedHome.homeName)
+          // this.$set(this.homes,homeIndex,arg.changedHome)
+          // this.currentHome = arg.enterHomeName
+          // this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
+          // this.openDraw()
         }else if(arg.status == 'deleteHome'){
           let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.deleteHomeName)
           if(homeIndex < this.currentHomeIndex){
