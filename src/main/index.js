@@ -194,7 +194,8 @@ function openLocalnet(){
         let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
         if(rinfo.address === IPAddress){
           if(homeIndex !== -1){
-            currentHome = homes[homeIndex].members.push(IPAddress)//相当于两步操作，homes和currentHome都已修改
+            homes[homeIndex].members.push(IPAddress)
+            currentHome = homes[homeIndex]
           }
           me.send('notice-vice', {
             status: 'enterHome',
