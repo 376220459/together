@@ -150,7 +150,7 @@ function openLocalnet(){
           })
         }
       }else if(msg.status == 'createHome'){
-        if(rinfo.address === IPAddress){
+        if(rinfo.address == IPAddress){
           currentHome = msg.home
           homes.push(msg.home)
           me.send('notice-vice', {
@@ -191,60 +191,58 @@ function openLocalnet(){
           homes: homes
         })
       }else if(msg.status == 'enterHome'){
-        let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
         if(rinfo.address === IPAddress){
-          if(homeIndex !== -1){
-            homes[homeIndex].members.push(IPAddress)
-            currentHome = homes[homeIndex]
-          }
+          let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
+          homes[homeIndex].members.push(msg.ip)
+          currentHome = homes[homeIndex]
           me.send('notice-vice', {
             status: 'enterHome',
             homes: homes,
             enterHomeName: msg.homeName
           })
-
-
-
-          // currentHome = msg.home
-          // homes.push(msg.home)
-          // me.send('notice-vice', {
-          //   status: 'createHome',
-          //   homes: homes,
-          //   newHomeName: msg.home.homeName
-          // })
         }else{
-          if(homeIndex !== -1){
-            homes[homeIndex].members.push(msg.ip)
-          }
+          let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
+          homes[homeIndex].members.push(msg.ip)
           me.send('notice-vice', {
             status: 'updateHomes',
             homes: homes
           })
-          // homes.push(msg.home)
-          // me.send('notice-vice', {
-          //   status: 'updateHomes',
-          //   homes: homes
-          // })
         }
       }else if(msg.status = 'exitHome'){
-        let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
-        if(homeIndex !== -1){
-          let memberIndex = homes[homeIndex].members.indexOf(msg.ip)
-          if(memberIndex !== -1){
-            homes[homeIndex].members.splice(memberIndex,1)//注意：splice方法返回的是被删除的元素组成的数组，而不是删除后的数组
-            if(!homes[homeIndex].members.length){
-              homes.splice(homeIndex,1)
-            }
-          }
-        }
-        
         if(rinfo.address === IPAddress){
           currentHome = null
+        }
+        let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
+        let memberIndex = homes[homeIndex].members.indexOf(msg.ip)
+        homes[homeIndex].members.splice(memberIndex,1)
+        if(homes[homeIndex].members.length === 0){
+          homes.splice(homeIndex,1)
         }
         me.send('notice-vice', {
           status: 'updateHomes',
           homes: homes
         })
+
+
+
+        // let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
+        // if(homeIndex !== -1){
+        //   let memberIndex = homes[homeIndex].members.indexOf(msg.ip)
+        //   if(memberIndex !== -1){
+        //     homes[homeIndex].members.splice(memberIndex,1)//注意：splice方法返回的是被删除的元素组成的数组，而不是删除后的数组
+        //     if(!homes[homeIndex].members.length){
+        //       homes.splice(homeIndex,1)
+        //     }
+        //   }
+        // }
+        
+        // if(rinfo.address === IPAddress){
+        //   currentHome = null
+        // }
+        // me.send('notice-vice', {
+        //   status: 'updateHomes',
+        //   homes: homes
+        // })
 
         // if(homeIndex !== -1){
         //   let memberIndex = homes[homeIndex].members.indexOf(msg.ip)
@@ -398,7 +396,7 @@ ipc.on('notice-main',(event, arg)=>{
     server.send(JSON.stringify({
       status: 'exitHome',
       homeName: arg.homeName,
-      ip: IPAddress
+      ip: arg.ip
     }),'8066',multicastAddr)
 
     // let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)

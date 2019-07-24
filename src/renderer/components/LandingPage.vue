@@ -355,21 +355,21 @@ export default {
         }else if(arg.status == 'createHome'){
           this.homes = arg.homes
           this.currentHome = arg.newHomeName
-          this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
-          
-          console.log('创建'+this.homes.map(e=>e.homeName))
+          this.currentHomeIndex = arg.homes.map(e=>e.homeName).indexOf(arg.newHomeName)
           this.openDraw()
+          
+          // console.log('创建'+this.homes.map(e=>e.homeName))
           // console.log(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
           // this.enterHome(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
         }else if(arg.status == 'updateHomes'){
           this.homes = arg.homes
           console.log('房间列表更新')
-          console.log(this.homes.map(e=>e.homeName))
+          // console.log(this.homes.map(e=>e.homeName))
         }else if(arg.status == 'enterHome'){
-          console.log(arg.enterHomeName)
+          // console.log(arg.enterHomeName)
           this.homes = arg.homes
           this.currentHome = arg.enterHomeName
-          this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
+          this.currentHomeIndex = arg.homes.map(e=>e.homeName).indexOf(arg.enterHomeName)
           this.openDraw()
         }
       })
@@ -439,7 +439,8 @@ export default {
       }else{
         ipc.send('notice-main', {
           status: 'exitHome',
-          homeName: this.currentHome
+          homeName: this.currentHome,
+          ip: this.ip
         })
       }
       this.currentHome = ''
