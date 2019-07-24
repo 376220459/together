@@ -330,19 +330,51 @@ ipc.on('notice-main',(event, arg)=>{
       }),'8066',arg.otherAddress)
     }
   }else if(arg.status == 'sendStart'){
-    server.send(JSON.stringify({
-      status: 'otherStart',
-      e: arg.e
-    }),'8066',arg.otherAddress)
+    homes[homes.map(e=>e.homeName).indexOf(arg.homeName)].members.forEach(e=>{
+      if(e !== IPAddress){
+        server.send(JSON.stringify({
+          status: 'otherStart',
+          e: arg.e
+        }),'8066',e)
+      }
+    })
+
+
+    // server.send(JSON.stringify({
+    //   status: 'otherStart',
+    //   e: arg.e
+    // }),'8066',arg.otherAddress)
   }else if(arg.status == 'sendDrawing'){
-    server.send(JSON.stringify({
-      status: 'otherDrawing',
-      e: arg.e
-    }),'8066',arg.otherAddress)
+    homes[homes.map(e=>e.homeName).indexOf(arg.homeName)].members.forEach(e=>{
+      if(e !== IPAddress){
+        server.send(JSON.stringify({
+          status: 'otherDrawing',
+          e: arg.e
+        }),'8066',e)
+      }
+    })
+
+
+
+    // server.send(JSON.stringify({
+    //   status: 'otherDrawing',
+    //   e: arg.e
+    // }),'8066',arg.otherAddress)
   }else if(arg.status == 'sendStop'){
-    server.send(JSON.stringify({
-      status: 'otherStop'
-    }),'8066',arg.otherAddress)
+    homes[homes.map(e=>e.homeName).indexOf(arg.homeName)].members.forEach(e=>{
+      if(e !== IPAddress){
+        server.send(JSON.stringify({
+          status: 'otherStop',
+          e: arg.e
+        }),'8066',e)
+      }
+    })
+
+
+
+    // server.send(JSON.stringify({
+    //   status: 'otherStop'
+    // }),'8066',arg.otherAddress)
   }else if(arg.status == 'exitDraw'){
     server.send(JSON.stringify({
       status: 'exitDraw'

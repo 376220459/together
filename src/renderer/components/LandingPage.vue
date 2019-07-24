@@ -102,7 +102,7 @@ window.addEventListener('resize',debounce(function(){
   let canvas = document.getElementById('canvas')
   let canvasDiv = document.getElementById('canvasDiv')
   if(canvas.style.display == 'block'){
-    console.log(canvasDiv.offsetWidth,canvasDiv.offsetHeight)
+    // console.log(canvasDiv.offsetWidth,canvasDiv.offsetHeight)
     canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
     canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
   }
@@ -350,7 +350,7 @@ export default {
         }else if(arg.status == 'otherDrawing'){
           this.otherDrawing(arg.e)
         }else if(arg.status == 'otherStop'){
-          this.otherStop()
+          this.otherStop(arg.e)
         }else if(arg.status == 'exitDraw'){
           // console.log('对方终止了协作')
           this.$message.warning(`${this.otherAddress}终止了协作`)
@@ -700,6 +700,17 @@ export default {
             }
         }));
       }else{
+        ipc.send(JSON.stringify({
+            status: 'sendStart',
+            homeName: this.currentHome,
+            ip: this.ip,
+            e: {
+              ip: this.ip,
+              clientX: x,
+              clientY: y,
+              color: this.color
+            }
+        }));
         // ipc.send('notice-main', {
         //   status: 'sendStart',
         //   otherAddress: this.otherAddress,
@@ -728,6 +739,20 @@ export default {
             }
         }));
       }else{
+        ipc.send(JSON.stringify({
+            status: 'sendDrawing',
+            homeName: this.currentHome,
+            ip: this.ip,
+            e: {
+              ip: this.ip,
+              clientX: x,
+              clientY: y,
+              color: this.color
+            }
+        }));
+
+
+
         // ipc.send('notice-main', {
         //   status: 'sendDrawing',
         //   otherAddress: this.otherAddress,
@@ -750,6 +775,17 @@ export default {
             }
         }));
       }else{
+        ipc.send(JSON.stringify({
+            status: 'sendStop',
+            homeName: this.currentHome,
+            ip: this.ip,
+            e: {
+              ip: this.ip
+            }
+        }));
+
+
+
         // ipc.send('notice-main', {
         //   status: 'sendStop',
         //   otherAddress: this.otherAddress
