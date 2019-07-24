@@ -382,9 +382,9 @@ export default {
           // console.log(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
           // this.enterHome(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
         }else if(arg.status == 'updateHomes'){
-          this.initPen()
           this.homes = arg.homes
           console.log('房间列表更新')
+          this.initPen()
 
 
 
