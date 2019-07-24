@@ -597,7 +597,7 @@ export default {
       let canvasDiv = document.getElementById('canvasDiv')
       let currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
       // this.homes[this.currentHomeIndex].members.forEach(e=>{
-      if(currentHomeIndex){
+      if(this.currentHome){
         this.homes[currentHomeIndex].members.forEach(e=>{
           this.pens[e] = {}
           this.pens[e].ctx = canvas.getContext("2d")
