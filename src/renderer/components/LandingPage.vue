@@ -346,10 +346,13 @@ export default {
             this.otherAddress = ''
           }
         }else if(arg.status == 'otherStart'){
+          console.log(arg.e)
           this.otherStart(arg.e)
         }else if(arg.status == 'otherDrawing'){
+          console.log(arg.e)
           this.otherDrawing(arg.e)
         }else if(arg.status == 'otherStop'){
+          console.log(arg.e)
           this.otherStop(arg.e)
         }else if(arg.status == 'exitDraw'){
           // console.log('对方终止了协作')
@@ -700,7 +703,7 @@ export default {
             }
         }));
       }else{
-        ipc.send(JSON.stringify({
+        ipc.send('notice-main', {
             status: 'sendStart',
             homeName: this.currentHome,
             ip: this.ip,
@@ -710,7 +713,10 @@ export default {
               clientY: y,
               color: this.color
             }
-        }));
+        })
+
+
+
         // ipc.send('notice-main', {
         //   status: 'sendStart',
         //   otherAddress: this.otherAddress,
@@ -739,7 +745,7 @@ export default {
             }
         }));
       }else{
-        ipc.send(JSON.stringify({
+        ipc.send('notice-main', {
             status: 'sendDrawing',
             homeName: this.currentHome,
             ip: this.ip,
@@ -749,7 +755,7 @@ export default {
               clientY: y,
               color: this.color
             }
-        }));
+        })
 
 
 
@@ -775,14 +781,14 @@ export default {
             }
         }));
       }else{
-        ipc.send(JSON.stringify({
+        ipc.send('notice-main', {
             status: 'sendStop',
             homeName: this.currentHome,
             ip: this.ip,
             e: {
               ip: this.ip
             }
-        }));
+        })
 
 
 
