@@ -296,8 +296,9 @@ ipc.on('notice-main',(event, arg)=>{
     let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
     let memberIndex = homes[homeIndex].members.indexOf(IPAddress)
     if(memberIndex !== -1){
-        let home2 = homes[homeIndex]
         homes[homeIndex].members.splice(memberIndex,1)
+        let home2 = homes[homeIndex]
+        
         if(!homes[homeIndex].members.length){
             homes.splice(homeIndex,1)
             server.send(JSON.stringify({

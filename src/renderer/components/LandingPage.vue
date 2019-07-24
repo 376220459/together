@@ -348,6 +348,8 @@ export default {
           this.otherAddress = ''
         }else if(arg.status == 'getHomes'){
           this.homes = arg.homes
+          // this.homes = []
+          // this.$set(this.homes,0,...arg.homes)
           console.log('房间列表更新')
         }else if(arg.status == 'addNewHome'){
           this.homes = arg.homes
@@ -642,15 +644,15 @@ export default {
             }
         }));
       }else{
-        ipc.send('notice-main', {
-          status: 'sendStart',
-          otherAddress: this.otherAddress,
-          e: {
-            clientX: x,
-            clientY: y,
-            color: this.color
-          }
-        })
+        // ipc.send('notice-main', {
+        //   status: 'sendStart',
+        //   otherAddress: this.otherAddress,
+        //   e: {
+        //     clientX: x,
+        //     clientY: y,
+        //     color: this.color
+        //   }
+        // })
       }
     },
     sendDrawing(e){
@@ -670,14 +672,14 @@ export default {
             }
         }));
       }else{
-        ipc.send('notice-main', {
-          status: 'sendDrawing',
-          otherAddress: this.otherAddress,
-          e: {
-            clientX: x,
-            clientY: y
-          }
-        })
+        // ipc.send('notice-main', {
+        //   status: 'sendDrawing',
+        //   otherAddress: this.otherAddress,
+        //   e: {
+        //     clientX: x,
+        //     clientY: y
+        //   }
+        // })
       }
     },
     sendStop(){
@@ -692,10 +694,10 @@ export default {
             }
         }));
       }else{
-        ipc.send('notice-main', {
-          status: 'sendStop',
-          otherAddress: this.otherAddress
-        })
+        // ipc.send('notice-main', {
+        //   status: 'sendStop',
+        //   otherAddress: this.otherAddress
+        // })
       }
     }
   },
