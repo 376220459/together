@@ -355,7 +355,7 @@ ipc.on('notice-main',(event, arg)=>{
     // let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
     server.send(JSON.stringify({
       status: 'enterHome',
-      homeName: currentHome,
+      homeName: arg.homeName,
       ip: IPAddress
     }),'8066',multicastAddr)
 

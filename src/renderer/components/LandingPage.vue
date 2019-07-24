@@ -362,9 +362,11 @@ export default {
           this.homes = arg.homes
           console.log('房间列表更新')
         }else if(arg.status == 'enterHome'){
+          console.log(arg.enterHomeName)
           this.homes = arg.homes
           this.currentHome = arg.enterHomeName
           this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
+          this.openDraw()
         }
       })
     },
@@ -407,11 +409,10 @@ export default {
       }
     },
     enterHome(item,index){
-      // console.log(this.currentHome)
-      this.openDraw()
       if(this.internet){
         this.currentHomeIndex = index
         this.currentHome = item
+        this.openDraw()
         this.ws.send(JSON.stringify({
             status: 'enterHome',
             homeName: this.currentHome,
