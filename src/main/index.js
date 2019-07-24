@@ -142,7 +142,7 @@ function openLocalnet(){
           }),'8066',rinfo.address);
         }
       }else if(msg.status == 'putHome'){
-        if(homes.map(e=>e.homeName).indexOf(msg.home) === -1){
+        if(homes.map(e=>e.homeName).indexOf(msg.home.homeName) === -1){
           homes.push(msg.home)
           me.send('notice-vice', {
             status: 'getHomes',
@@ -242,7 +242,7 @@ ipc.on('notice-main',(event, arg)=>{
           homes: homes
         }),'8066',multicastAddr)
 
-        me.send('notice-ip', {
+        me.send('notice-vice', {
           status: 'addNewHome',
           homes: homes
         })

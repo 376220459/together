@@ -21,7 +21,8 @@
         </div>
         <ul>
           <li class="member" v-for="(item, index) in this.homes[this.currentHomeIndex].members" :key="index">
-            <div>用户{{ index + 1 }}：{{ item }}</div>
+            <div class="self" v-if="item == ip">自己：{{ item }}</div>
+            <div v-else>用户{{ index + 1 }}：{{ item }}</div>
             <!-- <el-button @click="connectTo(item)">和他协作</el-button> -->
           </li>
         </ul>
@@ -43,7 +44,8 @@
       <div class="localnet" v-if="localnet && this.currentHome == '' ? true : false">
         <i class="el-icon-plus" title="创建房间" @click="openCreateHome"></i>
         <el-button class="change-net" icon="el-icon-sort" circle @click="changeNet" title="切换网络"></el-button>
-        <el-button class="get-button" @click="getConnections" type="primary" round plain>刷新内网房间列表</el-button>
+        <!-- <el-button class="get-button" @click="getConnections" type="primary" round plain>刷新内网房间列表</el-button> -->
+        <el-button class="get-button" @click="getHomes" type="primary" round plain>刷新内网房间列表</el-button>
         <ul>
           <li class="home-item" v-for="(item, index) in homes" :key="index">
             <div style="cursor: pointer;">||房间{{ index + 1 }}：{{ item.homeName }}({{ item.members.length }}人)</div>
@@ -59,10 +61,10 @@
         </ul> -->
       </div>
       <div class="canvas" id="canvasDiv" v-show="this.drawShow == 'block' ? true : false">
-        <div v-if="this.drawShow == 'block' ? true : false" class="canvas-top">
+        <!-- <div v-if="this.drawShow == 'block' ? true : false" class="canvas-top">
           <div class="canvas-tip">您正在与 {{ otherAddress }} 协作...</div>
           <el-button @click="exitDraw" type="danger" round>终止协作</el-button>
-        </div>
+        </div> -->
         <canvas @mousedown="start($event);sendStart($event)" @mousemove="drawing($event);sendDrawing($event)" @mouseup="stop();sendStop()" id="canvas" :style="{display:drawShow}">
           您的浏览器暂不支持canvas...
         </canvas>
@@ -170,6 +172,11 @@ export default {
         ipc.send('notice-main', {
           status: 'getHomes'
         })
+        this.$message({
+          type: 'success',
+          message: '房间列表已刷新',
+          duration: 1000
+        })
       }
     },
     openInternet(){
@@ -267,11 +274,13 @@ export default {
         })
       }
       
-      ipc.send('notice-main', {
-        status: 'connect'
-      })
+      this.getHomes()
+
+      // ipc.send('notice-main', {
+      //   status: 'connect'
+      // })
       
-      this.getConnections()
+      // this.getConnections()
 
       ipc.on('notice-vice', (event, arg)=>{
         if(arg.status == 'getConnections'){
@@ -388,7 +397,7 @@ export default {
     enterHome(item,index){
       this.currentHomeIndex = index
       this.currentHome = item
-      
+      // console.log(this.currentHome)
       this.openDraw()
       if(this.internet){
         this.ws.send(JSON.stringify({
@@ -780,10 +789,10 @@ export default {
         }
         .member{
           margin: 10px 0 10px 20px;
-          color: skyblue;
-          display: flex;
-          justify-content: space-around;
-          align-items: center;
+          text-align: left;
+          .self{
+            color: #67C23A;
+          }
         }
       }
       .internet{
@@ -867,19 +876,19 @@ export default {
         width: 70%;
         z-index: 10;
         padding: 50px 25px;
-        .canvas-top{
-          position: absolute;
-          width: 100%;
-          height: 48px;
-          margin-left: -25px;
-          margin-top: -50px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          .canvas-tip{
-            margin-right: 15px;
-          }
-        }
+        // .canvas-top{
+        //   position: absolute;
+        //   width: 100%;
+        //   height: 48px;
+        //   margin-left: -25px;
+        //   margin-top: -50px;
+        //   display: flex;
+        //   justify-content: center;
+        //   align-items: center;
+        //   .canvas-tip{
+        //     margin-right: 15px;
+        //   }
+        // }
         .canvas-tools{
           position: absolute;
           width: 100%;
