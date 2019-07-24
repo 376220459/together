@@ -330,7 +330,6 @@ ipc.on('notice-main',(event, arg)=>{
       }),'8066',arg.otherAddress)
     }
   }else if(arg.status == 'sendStart'){
-    console.log('hahaha')
     homes[homes.map(e=>e.homeName).indexOf(arg.homeName)].members.forEach(e=>{
       if(e !== IPAddress){
         server.send(JSON.stringify({

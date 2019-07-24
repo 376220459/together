@@ -346,13 +346,13 @@ export default {
             this.otherAddress = ''
           }
         }else if(arg.status == 'otherStart'){
-          console.log(arg.e)
+          // console.log(arg.e)
           this.otherStart(arg.e)
         }else if(arg.status == 'otherDrawing'){
-          console.log(arg.e)
+          // console.log(arg.e)
           this.otherDrawing(arg.e)
         }else if(arg.status == 'otherStop'){
-          console.log(arg.e)
+          // console.log(arg.e)
           this.otherStop(arg.e)
         }else if(arg.status == 'exitDraw'){
           // console.log('对方终止了协作')
@@ -382,6 +382,7 @@ export default {
           // console.log(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
           // this.enterHome(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
         }else if(arg.status == 'updateHomes'){
+          this.initPen()
           this.homes = arg.homes
           console.log('房间列表更新')
 
@@ -596,12 +597,14 @@ export default {
       let canvasDiv = document.getElementById('canvasDiv')
       let currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
       // this.homes[this.currentHomeIndex].members.forEach(e=>{
-      this.homes[currentHomeIndex].members.forEach(e=>{
-        this.pens[e] = {}
-        this.pens[e].ctx = canvas.getContext("2d")
-        this.pens[e].path = new Path2D()
-        this.pens[e].tag = false
-      })
+      if(currentHomeIndex){
+        this.homes[currentHomeIndex].members.forEach(e=>{
+          this.pens[e] = {}
+          this.pens[e].ctx = canvas.getContext("2d")
+          this.pens[e].path = new Path2D()
+          this.pens[e].tag = false
+        })
+      }
     },
     openDraw(){
       if(this.drawShow == 'none'){
