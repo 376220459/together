@@ -33,7 +33,7 @@
         <el-button class="change-net" icon="el-icon-sort" circle @click="changeNet" title="切换网络"></el-button>
         <el-button class="get-button" type="primary" round @click="getHomes" plain>刷新公网房间列表</el-button>
         <!-- <el-button class="get-button" type="primary" icon="el-icon-refresh" circle @click="getHomes"></el-button> -->
-        <ul>
+        <ul v-if="homes.length ? true :false">
           <li class="home-item" v-for="(item, index) in homes" :key="index">
             <div style="cursor: pointer;">||房间{{ index + 1 }}：{{ item.homeName }}({{ item.members.length }}人)</div>
             <el-button round type="success" @click="enterHome(item.homeName,index)">进入</el-button>
@@ -46,7 +46,7 @@
         <el-button class="change-net" icon="el-icon-sort" circle @click="changeNet" title="切换网络"></el-button>
         <!-- <el-button class="get-button" @click="getConnections" type="primary" round plain>刷新内网房间列表</el-button> -->
         <el-button class="get-button" @click="getHomes" type="primary" round plain>刷新内网房间列表</el-button>
-        <ul>
+        <ul v-if="homes.length ? true :false">
           <li class="home-item" v-for="(item, index) in homes" :key="index">
             <div style="cursor: pointer;">||房间{{ index + 1 }}：{{ item.homeName }}({{ item.members.length }}人)</div>
             <el-button round type="success" @click="enterHome(item.homeName,index)">进入</el-button>
