@@ -21,10 +21,8 @@
         </div>
         <ul>
           <li class="member" v-for="(item, index) in this.homes[this.homes.map(e=>e.homeName).indexOf(this.currentHome)].members" :key="index">
-          <!-- <li class="member" v-for="(item, index) in this.homes[this.currentHomeIndex].members" :key="index"> -->
             <div class="self" v-if="item == ip">自己：{{ item }}</div>
             <div v-else>用户{{ index + 1 }}：{{ item }}</div>
-            <!-- <el-button @click="connectTo(item)">和他协作</el-button> -->
           </li>
         </ul>
       </div>
@@ -33,7 +31,6 @@
         <i class="el-icon-plus" title="创建房间" @click="openCreateHome"></i>
         <el-button class="change-net" icon="el-icon-sort" circle @click="changeNet" title="切换网络"></el-button>
         <el-button class="get-button" type="primary" round @click="getHomes" plain>刷新公网房间列表</el-button>
-        <!-- <el-button class="get-button" type="primary" icon="el-icon-refresh" circle @click="getHomes"></el-button> -->
         <ul v-if="homes.length ? true :false">
           <li class="home-item" v-for="(item, index) in homes" :key="index">
             <div style="cursor: pointer;">||房间{{ index + 1 }}：{{ item.homeName }}({{ item.members.length }}人)</div>
@@ -45,7 +42,6 @@
       <div class="localnet" v-if="localnet && this.currentHome == '' ? true : false">
         <i class="el-icon-plus" title="创建房间" @click="openCreateHome"></i>
         <el-button class="change-net" icon="el-icon-sort" circle @click="changeNet" title="切换网络"></el-button>
-        <!-- <el-button class="get-button" @click="getConnections" type="primary" round plain>刷新内网房间列表</el-button> -->
         <el-button class="get-button" @click="getHomes" type="primary" round plain>刷新内网房间列表</el-button>
         <ul v-if="homes.length ? true :false">
           <li class="home-item" v-for="(item, index) in homes" :key="index">
@@ -53,20 +49,9 @@
             <el-button round type="success" @click="enterHome(item.homeName,index)">进入</el-button>
           </li>
         </ul>
-        <!-- <div class="user-title">用户列表:</div>
-        <ul>
-          <li v-for="(item, index) in connections" :key="index">
-            <span>{{ item }}</span>
-            <el-button @click="connectTo(item)" type="success" round>和他协作</el-button>
-          </li>
-        </ul> -->
       </div>
       <div class="canvas" id="canvasDiv" v-show="this.drawShow == 'block' ? true : false">
-        <!-- <div v-if="this.drawShow == 'block' ? true : false" class="canvas-top">
-          <div class="canvas-tip">您正在与 {{ otherAddress }} 协作...</div>
-          <el-button @click="exitDraw" type="danger" round>终止协作</el-button>
-        </div> -->
-        <canvas @mousedown="start($event);sendStart($event)" @mousemove="drawing($event);sendDrawing($event)" @mouseup="stop();sendStop()" id="canvas" :style="{display:drawShow}">
+        <canvas @mousedown="start($event);sendStart($event)" @mousemove="drawing($event);sendDrawing($event)" @mouseup="stop();sendStop()" @mouseleave="stop();sendStop()" id="canvas" :style="{display:drawShow}">
           您的浏览器暂不支持canvas...
         </canvas>
         <div v-if="this.drawShow == 'block' ? true : false" class="canvas-tools">
@@ -102,12 +87,9 @@ window.addEventListener('resize',debounce(function(){
   let canvas = document.getElementById('canvas')
   let canvasDiv = document.getElementById('canvasDiv')
   if(canvas.style.display == 'block'){
-    // console.log(canvasDiv.offsetWidth,canvasDiv.offsetHeight)
     canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
     canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
   }
-  // canvas.width = canvasDiv.offsetWidth
-  // canvas.height = canvasDiv.offsetHeight
 },500),false)
 
 export default {
@@ -120,7 +102,6 @@ export default {
       localnet: false,
       ip: '',
       currentHome: '',
-      currentHomeIndex: '',
       homes: [],
       newHomeName: '',
       drawShow: 'none',
@@ -129,13 +110,9 @@ export default {
       colorStyle: [,,,,'background:white;border:7px solid black;'],
       otherColor: 'black',
       connections: [],
-      otherAddress: '',
       ctx: null,
-      otherctx: null,
       path: null,
-      otherpath: null,
       tag: false,
-      othertag: false,
       x: 0,
       y: 0
     }
@@ -157,7 +134,6 @@ export default {
         }
         this.localnet = false
         this.internet = true
-
         ipc.removeAllListeners('notice-vice')
         this.openInternet()
       }
@@ -178,15 +154,6 @@ export default {
           message: '房间列表已刷新',
           duration: 1000
         })
-
-        // ipc.send('notice-main', {
-        //   status: 'getHomes'
-        // })
-        // this.$message({
-        //   type: 'success',
-        //   message: '房间列表已刷新',
-        //   duration: 1000
-        // })
       }
     },
     openInternet(){
@@ -196,10 +163,7 @@ export default {
             let obj = JSON.parse(e.data)
             if(obj.status == 'addNewHome'){
               this.homes = obj.homes
-              
               this.enterHome(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
-              // this.currentHomeIndex = this.homes.length - 1
-              // this.currentHome = this.homes[this.homes.length - 1].homeName
             }else if(obj.status == 'getHomes'){
               this.homes = obj.homes
               this.$message({
@@ -210,53 +174,12 @@ export default {
               if(this.currentHome){
                 this.initPen()
               }
-            }else if(obj.status == 'requestDraw'){
-              this.$confirm(`${obj.otherAddress} 请求与您一同协作，是否同意？`, '协作助手', {
-                confirmButtonText: '同意',
-                cancelButtonText: '拒绝',
-                type: 'warning'
-              }).then(() => {
-                console.log('同意对方的请求')
-                this.openDraw();
-                this.otherAddress = obj.otherAddress
-                this.ws.send(JSON.stringify({
-                    status: 'responseDraw',
-                    ip: this.ip,
-                    otherAddress: obj.otherAddress,
-                    agree: 'yes'
-                }))
-              }).catch(() => {
-                console.log('拒绝对方的请求')
-                this.ws.send(JSON.stringify({
-                    status: 'responseDraw',
-                    ip: this.ip,
-                    otherAddress: obj.otherAddress,
-                    agree: 'no'
-                }))          
-              });
-            }else if(obj.status == 'responseDraw'){
-              // console.log(obj.agree)
-              if(obj.agree == 'yes'){
-                console.log(`${obj.otherAddress}同意了你的请求`)
-                this.$message.success(`成功与${obj.otherAddress}建立连接`)
-                this.openDraw();
-                this.otherAddress = obj.otherAddress
-              }else{
-                console.log(`${obj.otherAddress}拒绝了你的请求`)
-                this.$message.warning(`${obj.otherAddress}拒绝了你的请求`)
-                this.otherAddress = ''
-              }
             }else if(obj.status == 'otherStart'){
               this.otherStart(obj.e)
             }else if(obj.status == 'otherDrawing'){
               this.otherDrawing(obj.e)
             }else if(obj.status == 'otherStop'){
-              // this.otherStop()
               this.otherStop(obj.e)
-            }else if(obj.status == 'exitDraw'){
-              this.$message.warning(`${this.otherAddress}终止了协作`)
-              this.drawShow = 'none'
-              this.otherAddress = ''
             }
         }
         this.ws.onopen = ()=>{
@@ -266,19 +189,16 @@ export default {
                     status: 'connect',
                     ip: this.ip
                 }));
-
                 this.getHomes()
             }
         }
         this.ws.onclose = ()=>{
             console.log('ws通道已关闭');
-            // this.openInternet()
         }
     },
     openLocalnet(){
       if(!this.localnetOpened){
         this.localnetOpened = true
-
         ipc.send('notice-main', {
           status: 'openLocalnet'
         })
@@ -286,130 +206,25 @@ export default {
       
       this.getHomes()
 
-      // ipc.send('notice-main', {
-      //   status: 'connect'
-      // })
-      
-      // this.getConnections()
-
       ipc.on('notice-vice', (event, arg)=>{
-        if(arg.status == 'getConnections'){
-          console.log(arg.msg)
-        }else if(arg.status == 'returnConnections'){
-          console.log(arg.msg)
-          if(this.connections.join('') != arg.connections.join('')){
-            this.$message({
-              message: '用户列表更新啦',
-              type: 'success',
-              duration: 1500
-            })
-            this.connections = arg.connections
-          // this.$set(this.connections,0,...arg.connections)
-          }else{
-            this.$message({
-              message: '似乎并没有新用户加入',
-              type: 'info',
-              duration: 1500
-            })
-          }
-        }else if(arg.status == 'responseDraw'){
-          this.$confirm(`${arg.otherAddress} 请求与您一同协作，是否同意？`, '协作助手', {
-            confirmButtonText: '同意',
-            cancelButtonText: '拒绝',
-            type: 'warning'
-          }).then(() => {
-            console.log('同意对方的请求')
-            this.openDraw();
-            this.otherAddress = arg.otherAddress
-            ipc.send('notice-main', {
-              status: 'agreeUser',
-              agree: 'yes',
-              otherAddress: arg.otherAddress
-            })
-          }).catch(()=>{
-            console.log('拒绝对方的请求')
-            ipc.send('notice-main', {
-              status: 'agreeUser',
-              agree: 'no',
-              otherAddress: arg.otherAddress
-            })
-          });
-        }else if(arg.status == 'responseUser'){
-          if(arg.agree == 'yes'){
-            console.log(`${arg.otherAddress}同意了你的请求`)
-            this.$message.success(`成功与${arg.otherAddress}建立连接`)
-            this.openDraw();
-            this.otherAddress = arg.otherAddress
-          }else{
-            console.log(`${arg.otherAddress}拒绝了你的请求`)
-            this.$message.warning(`${arg.otherAddress}拒绝了你的请求`)
-            this.otherAddress = ''
-          }
-        }else if(arg.status == 'otherStart'){
-          // console.log(arg.e)
+        if(arg.status == 'otherStart'){
           this.otherStart(arg.e)
         }else if(arg.status == 'otherDrawing'){
-          // console.log(arg.e)
           this.otherDrawing(arg.e)
         }else if(arg.status == 'otherStop'){
-          // console.log(arg.e)
           this.otherStop(arg.e)
-        }else if(arg.status == 'exitDraw'){
-          // console.log('对方终止了协作')
-          this.$message.warning(`${this.otherAddress}终止了协作`)
-          this.drawShow = 'none'
-          this.otherAddress = ''
-        }else if(arg.status == 'getHomes'){
-          // console.log(arg.homes)
-          this.homes = arg.homes
-          // this.homes = []
-          // this.$set(this.homes,0,...arg.homes)
-          console.log('房间列表更新')
         }else if(arg.status == 'createHome'){
           this.homes = arg.homes
           this.currentHome = this.homes[this.homes.length - 1].homeName
           this.openDraw()
-
-
-
-          // // this.homes = arg.homes
-          // this.homes.push(arg.changedHome)
-          // this.currentHome = arg.newHomeName
-          // this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
-          // this.openDraw()
-          
-          // console.log('创建'+this.homes.map(e=>e.homeName))
-          // console.log(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
-          // this.enterHome(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
         }else if(arg.status == 'updateHomes'){
           this.homes = arg.homes
           console.log('房间列表更新')
           this.initPen()
-
-
-
-          // let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.changedHome.homeName)
-          // this.$set(this.homes,homeIndex,arg.changedHome)
-          // console.log('房间列表更新')
         }else if(arg.status == 'enterHome'){
           this.homes = arg.homes
           this.currentHome = this.homes[this.homes.length - 1].homeName
           this.openDraw()
-
-
-
-          // let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.changedHome.homeName)
-          // this.$set(this.homes,homeIndex,arg.changedHome)
-          // this.currentHome = arg.enterHomeName
-          // this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
-          // this.openDraw()
-        }else if(arg.status == 'deleteHome'){
-          let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.deleteHomeName)
-          if(homeIndex < this.currentHomeIndex){
-            this.currentHomeIndex--
-          }
-          this.homes.splice(homeIndex,1)
-          console.log('有房间被删除')
         }
       })
     },
@@ -448,10 +263,6 @@ export default {
           status: 'createHome',
           homeName: this.newHomeName
         })
-
-        // this.currentHome = this.newHomeName
-        // this.openDraw()
-
         this.closeCreateHome()
       }
     },
@@ -499,108 +310,25 @@ export default {
         this.openLocalnet()
       }
     },
-    getConnections(){
-      // this.openDraw();
-      ipc.send('notice-main', {
-        status: 'getConnections'
-      })
-    },
-    connectTo(address){
-      if(address === this.ip){
-        this.$message({
-          type: 'warning',
-          message: '不能选择自己哦',
-          duration: 1000
-        })
-        return
-      }
-      if(this.internet){
-        if(this.drawShow === 'block'){
-          this.$confirm(`您确定要终止与 ${this.otherAddress} 的协作吗？`, '协作助手', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            this.exitDraw()
-          }).catch(()=>{
-            console.log('取消操作')
-          });
-        }else{
-          this.ws.send(JSON.stringify({
-              status: 'requestDraw',
-              ip: this.ip,
-              otherAddress: address
-          }));
-          // address = address.slice(0,-5)
-          // ipc.send('notice-main', {
-          //   status: 'requestUser',
-          //   otherAddress: address
-          // })
-        }
-      }else{
-        if(this.drawShow === 'block'){
-          this.$confirm(`您确定要终止与 ${this.otherAddress} 的协作吗？`, '协作助手', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            this.exitDraw()
-          }).catch(()=>{
-            console.log('取消操作')
-          });
-        }else{
-          address = address.slice(0,-5)
-          ipc.send('notice-main', {
-            status: 'requestUser',
-            otherAddress: address
-          })
-        }
-      }
-    },
     changeColor(color,index){
       this.color = color
       this.colorStyle = []
-      // this.colorStyle[index] = 'width:25px;height:25px;border:2px solid #B0B0B0;'
       this.colorStyle[index] = `background:white;border:7px solid ${color};`
     },
     exitDraw(){
       this.drawShow = 'none'
       this.color = 'black'
       this.colorStyle = [,,,,'background:white;border:7px solid black;']
-
-
-
-      // if(this.internet){
-      //   this.drawShow = 'none'
-      //   this.color = 'black'
-      //   this.colorStyle = [,,,,'background:white;border:7px solid black;']
-
-
-
-      //   // this.ws.send(JSON.stringify({
-      //   //     status: 'exitDraw',
-      //   //     ip: this.ip,
-      //   //     otherAddress: this.otherAddress
-      //   // }));
-      //   // this.otherAddress = ''
-      // }else{
-      //   this.drawShow = 'none'
-      //   ipc.send('notice-main', {
-      //     status: 'exitDraw',
-      //     otherAddress: this.otherAddress
-      //   })
-      //   this.otherAddress = ''
-      // }
     },
     initPen(){
       let canvas = document.getElementById('canvas')
       let canvasDiv = document.getElementById('canvasDiv')
       let currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
-      // this.homes[this.currentHomeIndex].members.forEach(e=>{
       if(this.currentHome){
         this.homes[currentHomeIndex].members.forEach(e=>{
           this.pens[e] = {}
           this.pens[e].ctx = canvas.getContext("2d")
+          this.pens[e].ctx.lineWidth = 3
           this.pens[e].path = new Path2D()
           this.pens[e].tag = false
         })
@@ -614,42 +342,21 @@ export default {
         setTimeout(() => {
           canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
           canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
-          // canvas.width = canvasDiv.offsetWidth - 50;
-          // canvas.height = canvasDiv.offsetHeight - 50;
         }, 0);
         this.ctx = canvas.getContext("2d")
         this.ctx.lineWidth = 3
-
-
         this.initPen()
-
-        this.otherctx = canvas.getContext("2d")
-        this.otherctx.lineWidth = 3
-        // this.path = new Path2D()
-        // this.otherpath = new Path2D()
       }
     },
     start(e){
       let canvasDiv = document.getElementById('canvasDiv')
       this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
       this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
-      // this.ctx.beginPath()
       this.path = new Path2D()
-      // this.ctx.strokeStyle = this.color
       this.path.moveTo(this.x,this.y)
       this.tag = true
     },
     otherStart(e){
-      // this.otherColor = e.color
-      // // this.otherctx.beginPath()
-      // this.otherpath = new Path2D()
-      // // this.otherctx.strokeStyle = this.otherColor
-      // this.otherpath.moveTo(e.clientX,e.clientY)
-      // this.othertag = true
-
-
-      
-      
       this.pens[e.ip].path = new Path2D()
       this.pens[e.ip].path.moveTo(e.clientX,e.clientY)
       this.pens[e.ip].tag = true
@@ -665,15 +372,7 @@ export default {
       }
     },
     otherDrawing(e){
-      // if(this.othertag){
       if(this.pens[e.ip].tag){
-        // this.otherctx.strokeStyle = this.otherColor
-        // this.otherpath.lineTo(e.clientX,e.clientY)
-        // this.otherctx.stroke(this.otherpath)
-
-
-        // console.log(e)
-        
         this.pens[e.ip].ctx.strokeStyle = e.color
         this.pens[e.ip].path.lineTo(e.clientX,e.clientY)
         this.pens[e.ip].ctx.stroke(this.pens[e.ip].path)
@@ -683,10 +382,6 @@ export default {
       this.tag = false
     },
     otherStop(e){
-      // this.othertag = false
-
-
-
       this.pens[e.ip].tag = false
     },
     sendStart(e){
@@ -697,7 +392,6 @@ export default {
             status: 'sendStart',
             homeName: this.currentHome,
             ip: this.ip,
-            // otherAddress: this.otherAddress,
             e: {
               ip: this.ip,
               clientX: x,
@@ -717,18 +411,6 @@ export default {
               color: this.color
             }
         })
-
-
-
-        // ipc.send('notice-main', {
-        //   status: 'sendStart',
-        //   otherAddress: this.otherAddress,
-        //   e: {
-        //     clientX: x,
-        //     clientY: y,
-        //     color: this.color
-        //   }
-        // })
       }
     },
     sendDrawing(e){
@@ -739,7 +421,6 @@ export default {
             status: 'sendDrawing',
             homeName: this.currentHome,
             ip: this.ip,
-            // otherAddress: this.otherAddress,
             e: {
               ip: this.ip,
               clientX: x,
@@ -759,17 +440,6 @@ export default {
               color: this.color
             }
         })
-
-
-
-        // ipc.send('notice-main', {
-        //   status: 'sendDrawing',
-        //   otherAddress: this.otherAddress,
-        //   e: {
-        //     clientX: x,
-        //     clientY: y
-        //   }
-        // })
       }
     },
     sendStop(){
@@ -778,7 +448,6 @@ export default {
             status: 'sendStop',
             homeName: this.currentHome,
             ip: this.ip,
-            // otherAddress: this.otherAddress
             e: {
               ip: this.ip
             }
@@ -792,13 +461,6 @@ export default {
               ip: this.ip
             }
         })
-
-
-
-        // ipc.send('notice-main', {
-        //   status: 'sendStop',
-        //   otherAddress: this.otherAddress
-        // })
       }
     }
   },
@@ -904,13 +566,7 @@ export default {
           }
         }
       }
-      .internet{
-        // box-sizing: border-box;
-        // position: relative;
-        // width: 30%;
-        // border-right: 1px dotted black;
-        // padding: 20px;
-        // text-align: center;
+      .internet,.localnet{
         .change-net{
           position: absolute;
           top: 5px;
@@ -931,52 +587,7 @@ export default {
           justify-content: space-around;
           align-items: center;
           margin: 15px 0;
-          // text-align: left;
           color: #67C23A;
-          // .member{
-          //   margin: 10px 0 10px 20px;
-          //   color: skyblue;
-          //   display: flex;
-          //   justify-content: space-around;
-          //   align-items: center;
-          // }
-          // .enter-home{
-          //   position: absolute;
-          //   top: 0;
-          //   right: 0;
-          //   cursor: pointer;
-          // }
-        }
-      }
-      .localnet{
-        // box-sizing: border-box;
-        // width: 30%;
-        // border-right: 1px dotted black;
-        // padding: 20px;
-        // text-align: center;
-        .change-net{
-          position: absolute;
-          top: 5px;
-          left: 5px;
-          cursor: pointer;
-        }
-        .el-icon-plus{
-          position: absolute;
-          top: 5px;
-          right: 5px;
-          color: #409EFF;
-          font-size: 30px;
-          cursor: pointer;
-        }
-        .user-title{
-          box-sizing: border-box;
-          border-top: 1px dashed black;
-          margin: 15px 0;
-          padding-top: 5px;
-          text-align: left;
-        }
-        ul{
-          overflow: auto;
         }
       }
       .canvas{
@@ -985,19 +596,6 @@ export default {
         width: 70%;
         z-index: 10;
         padding: 50px 25px;
-        // .canvas-top{
-        //   position: absolute;
-        //   width: 100%;
-        //   height: 48px;
-        //   margin-left: -25px;
-        //   margin-top: -50px;
-        //   display: flex;
-        //   justify-content: center;
-        //   align-items: center;
-        //   .canvas-tip{
-        //     margin-right: 15px;
-        //   }
-        // }
         .canvas-tools{
           position: absolute;
           width: 100%;

@@ -11,15 +11,13 @@ let server = ws.createServer(conn=>{
             if(homes.map(e=>e.homeName).indexOf(obj.homeName) === -1){
                 homes.push({
                     homeName: obj.homeName,
-                    members: [obj.ip],
-                    // open: false
+                    members: [obj.ip]
                 })
                 conn.sendText(JSON.stringify({
                     status: 'addNewHome',
                     homes: homes
                 }));
                 server.connections.forEach(conn=>{
-                    // console.log(conn.path.slice(5))
                     if(obj.ip !== conn.path.slice(5)){
                         conn.sendText(JSON.stringify({
                             status: 'getHomes',
@@ -35,17 +33,6 @@ let server = ws.createServer(conn=>{
             }));
         }else if(obj.status == 'connect'){
             users[obj.ip] = conn
-        }else if(obj.status == 'requestDraw'){
-            users[obj.otherAddress].sendText(JSON.stringify({
-                status: 'requestDraw',
-                otherAddress: obj.ip
-            }));
-        }else if(obj.status == 'responseDraw'){
-            users[obj.otherAddress].sendText(JSON.stringify({
-                status: 'responseDraw',
-                agree: obj.agree,
-                otherAddress: obj.ip
-            }));
         }else if(obj.status == 'enterHome'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
             if(homes[homeIndex].members.indexOf(obj.ip) === -1){
@@ -82,10 +69,6 @@ let server = ws.createServer(conn=>{
                     }));
                 }
             })
-            // users[obj.otherAddress].sendText(JSON.stringify({
-            //     status: 'otherStart',
-            //     e: obj.e
-            // }));
         }else if(obj.status == 'sendDrawing'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
             homes[homeIndex].members.forEach(e=>{
@@ -96,10 +79,6 @@ let server = ws.createServer(conn=>{
                     }));
                 }
             })
-            // users[obj.otherAddress].sendText(JSON.stringify({
-            //     status: 'otherDrawing',
-            //     e: obj.e
-            // }));
         }else if(obj.status == 'sendStop'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
             homes[homeIndex].members.forEach(e=>{
@@ -110,13 +89,6 @@ let server = ws.createServer(conn=>{
                     }));
                 }
             })
-            // users[obj.otherAddress].sendText(JSON.stringify({
-            //     status: 'otherStop'
-            // }));
-        }else if(obj.status == 'exitDraw'){
-            users[obj.otherAddress].sendText(JSON.stringify({
-                status: 'exitDraw'
-            }));
         }
     })
     .on('close',()=>{
