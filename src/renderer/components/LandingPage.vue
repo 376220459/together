@@ -20,7 +20,8 @@
           <el-button round type="danger" @click="exitHome">退出</el-button>
         </div>
         <ul>
-          <li class="member" v-for="(item, index) in this.homes[this.currentHomeIndex].members" :key="index">
+          <li class="member" v-for="(item, index) in this.homes[this.homes.map(e=>e.homeName).indexOf(this.currentHome)].members" :key="index">
+          <!-- <li class="member" v-for="(item, index) in this.homes[this.currentHomeIndex].members" :key="index"> -->
             <div class="self" v-if="item == ip">自己：{{ item }}</div>
             <div v-else>用户{{ index + 1 }}：{{ item }}</div>
             <!-- <el-button @click="connectTo(item)">和他协作</el-button> -->
@@ -565,8 +566,9 @@ export default {
     initPen(){
       let canvas = document.getElementById('canvas')
       let canvasDiv = document.getElementById('canvasDiv')
-
-      this.homes[this.currentHomeIndex].members.forEach(e=>{
+      let currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
+      // this.homes[this.currentHomeIndex].members.forEach(e=>{
+      this.homes[currentHomeIndex].members.forEach(e=>{
         this.pens[e] = {}
         this.pens[e].ctx = canvas.getContext("2d")
         this.pens[e].path = new Path2D()
