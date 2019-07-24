@@ -460,11 +460,29 @@ ipc.on('notice-main',(event, arg)=>{
     //   home: currentHome
     // }),'8066',multicastAddr)
   }else if(arg.status == 'exitHome'){
+    let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
+    let memberIndex = homes[homeIndex].members.indexOf(arg.ip)
+    homes[homeIndex].members.splice(memberIndex,1)
+    if(homes[homeIndex].members.length === 0){
+      homes.splice(homeIndex,1)
+    }
+    me.send('notice-vice', {
+      status: 'updateHomes',
+      homes: homes
+    })
     server.send(JSON.stringify({
-      status: 'exitHome',
-      homeName: arg.homeName,
-      ip: arg.ip
+      status: 'updateHomes',
+      homes: homes
     }),'8066',multicastAddr)
+
+
+
+
+    // server.send(JSON.stringify({
+    //   status: 'exitHome',
+    //   homeName: arg.homeName,
+    //   ip: arg.ip
+    // }),'8066',multicastAddr)
 
     // let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
     // let memberIndex = -1
