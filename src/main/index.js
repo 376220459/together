@@ -162,7 +162,8 @@ function openLocalnet(){
           homes.push(msg.home)
           me.send('notice-vice', {
             status: 'updateHomes',
-            homes: homes
+            homes: homes,
+            changedHome: msg.home
           })
         }
 
@@ -205,7 +206,8 @@ function openLocalnet(){
           homes[homeIndex].members.push(msg.ip)
           me.send('notice-vice', {
             status: 'updateHomes',
-            homes: homes
+            homes: homes,
+            changedHome: homes[homeIndex]
           })
         }
       }else if(msg.status = 'exitHome'){
@@ -216,12 +218,19 @@ function openLocalnet(){
         let memberIndex = homes[homeIndex].members.indexOf(msg.ip)
         homes[homeIndex].members.splice(memberIndex,1)
         if(homes[homeIndex].members.length === 0){
+          me.send('notice-vice', {
+            status: 'deleteHome',
+            homes: homes,
+            deleteHomeName: homes[homeIndex].homeName
+          })
           homes.splice(homeIndex,1)
+        }else{
+          me.send('notice-vice', {
+            status: 'updateHomes',
+            homes: homes,
+            changedHome: homes[homeIndex]
+          })
         }
-        me.send('notice-vice', {
-          status: 'updateHomes',
-          homes: homes
-        })
 
 
 

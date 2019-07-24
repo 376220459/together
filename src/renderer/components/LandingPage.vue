@@ -362,8 +362,11 @@ export default {
           // console.log(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
           // this.enterHome(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
         }else if(arg.status == 'updateHomes'){
-          this.homes = arg.homes
+          // this.homes = arg.homes
+          let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.changedHome.homeName)
+          this.homes[homeIndex] = arg.changedHome
           console.log('房间列表更新')
+          // this.$set(this.homes,homeIndex,arg.changedHome)
           // console.log(this.homes.map(e=>e.homeName))
         }else if(arg.status == 'enterHome'){
           // console.log(arg.enterHomeName)
@@ -371,6 +374,10 @@ export default {
           this.currentHome = arg.enterHomeName
           this.currentHomeIndex = arg.homes.map(e=>e.homeName).indexOf(arg.enterHomeName)
           this.openDraw()
+        }else if(arg.status == 'deleteHome'){
+          let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.deleteHomeName)
+          this.homes.splice(homeIndex,1)
+          console.log('有房间被删除')
         }
       })
     },
