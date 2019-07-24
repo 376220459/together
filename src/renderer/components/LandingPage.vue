@@ -355,11 +355,16 @@ export default {
           this.homes = arg.homes
           this.currentHome = arg.newHomeName
           this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
+          this.openDraw()
           // console.log(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
           // this.enterHome(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
         }else if(arg.status == 'updateHomes'){
           this.homes = arg.homes
           console.log('房间列表更新')
+        }else if(arg.status == 'enterHome'){
+          this.homes = arg.homes
+          this.currentHome = arg.enterHomeName
+          this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
         }
       })
     },

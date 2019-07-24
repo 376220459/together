@@ -190,6 +190,56 @@ function openLocalnet(){
           status: 'getHomes',
           homes: homes
         })
+      }else if(msg.status == 'enterHome'){
+        let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
+        if(rinfo.address === IPAddress){
+          if(homeIndex !== -1){
+            currentHome = homes[homeIndex].members.push(IPAddress)//相当于两步操作，homes和currentHome都已修改
+          }
+          me.send('notice-vice', {
+            status: 'enterHome',
+            homes: homes,
+            enterHomeName: msg.homeName
+          })
+
+
+
+          // currentHome = msg.home
+          // homes.push(msg.home)
+          // me.send('notice-vice', {
+          //   status: 'createHome',
+          //   homes: homes,
+          //   newHomeName: msg.home.homeName
+          // })
+        }else{
+          if(homeIndex !== -1){
+            homes[homeIndex].members.push(msg.ip)
+          }
+          me.send('notice-vice', {
+            status: 'updateHomes',
+            homes: homes
+          })
+          // homes.push(msg.home)
+          // me.send('notice-vice', {
+          //   status: 'updateHomes',
+          //   homes: homes
+          // })
+        }
+      }else if(msg.status = 'exitHome'){
+        let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
+        if(homeIndex !== -1){
+          let memberIndex = homes[homeIndex].members.indexOf(msg.ip)
+          if(memberIndex !== -1){
+            homes[homeIndex].members.splice(memberIndex,1)//注意：splice方法返回的是被删除的元素组成的数组，而不是删除后的数组
+            if(!homes[homeIndex].members.length){
+              homes.splice(homeIndex,1)
+            }
+          }
+        }
+        me.send('notice-vice', {
+          status: 'updateHomes',
+          homes: homes
+        })
       }
   })
 
@@ -302,51 +352,64 @@ ipc.on('notice-main',(event, arg)=>{
     //   home: currentHome
     // }),'8066',multicastAddr)
   }else if(arg.status == 'enterHome'){
-    let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
-    if(homes[homeIndex].members.indexOf(IPAddress) === -1){
-      homes[homeIndex].members.push(IPAddress)
-      currentHome = homes[homeIndex]
-    }else{
-      currentHome = {
-        homeName: arg.homeName,
-        members: [IPAddress]
-      }
-    }
-    
+    // let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
     server.send(JSON.stringify({
-      status: 'homeChanged',
-      // homes: homes
-      home: currentHome
+      status: 'enterHome',
+      homeName: currentHome,
+      ip: IPAddress
     }),'8066',multicastAddr)
+
+
+    // if(homes[homeIndex].members.indexOf(IPAddress) === -1){
+    //   homes[homeIndex].members.push(IPAddress)
+    //   currentHome = homes[homeIndex]
+    // }else{
+    //   currentHome = {
+    //     homeName: arg.homeName,
+    //     members: [IPAddress]
+    //   }
+    // }
+    
+    // server.send(JSON.stringify({
+    //   status: 'homeChanged',
+    //   // homes: homes
+    //   home: currentHome
+    // }),'8066',multicastAddr)
   }else if(arg.status == 'exitHome'){
-    let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
-    let memberIndex = -1
-    if(homeIndex !== -1){
-      memberIndex = homes[homeIndex].members.indexOf(IPAddress)
-    }
-    if(memberIndex !== -1){
-        homes[homeIndex].members.splice(memberIndex,1)
-        let home2 = homes[homeIndex]
-        
-        if(!homes[homeIndex].members.length){
-            homes.splice(homeIndex,1)
-            server.send(JSON.stringify({
-              status: 'deleteHome',
-              home: home2
-            }),'8066',multicastAddr)
-        }else{
-          server.send(JSON.stringify({
-            status: 'homeChanged',
-            // homes: homes
-            home: home2
-          }),'8066',multicastAddr)
-        }
-    }
-    
-    currentHome = null
-    
     server.send(JSON.stringify({
-      status: 'getHomes'
+      status: 'exitHome',
+      homeName: arg.homeName,
+      ip: IPAddress
     }),'8066',multicastAddr)
+
+    // let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
+    // let memberIndex = -1
+    // if(homeIndex !== -1){
+    //   memberIndex = homes[homeIndex].members.indexOf(IPAddress)
+    // }
+    // if(memberIndex !== -1){
+    //     homes[homeIndex].members.splice(memberIndex,1)
+    //     let home2 = homes[homeIndex]
+        
+    //     if(!homes[homeIndex].members.length){
+    //         homes.splice(homeIndex,1)
+    //         server.send(JSON.stringify({
+    //           status: 'deleteHome',
+    //           home: home2
+    //         }),'8066',multicastAddr)
+    //     }else{
+    //       server.send(JSON.stringify({
+    //         status: 'homeChanged',
+    //         // homes: homes
+    //         home: home2
+    //       }),'8066',multicastAddr)
+    //     }
+    // }
+    
+    // currentHome = null
+    
+    // server.send(JSON.stringify({
+    //   status: 'getHomes'
+    // }),'8066',multicastAddr)
   }
 })
