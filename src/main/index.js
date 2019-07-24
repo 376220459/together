@@ -128,7 +128,8 @@ function openLocalnet(){
         })
       }else if(msg.status == 'otherStop'){
         me.send('notice-vice', {
-          status: 'otherStop'
+          status: 'otherStop',
+          e: msg.e
         })
       }else if(msg.status == 'exitDraw'){
         me.send('notice-vice', {
