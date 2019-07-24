@@ -168,7 +168,7 @@ function openLocalnet(){
       }else if(msg.status == 'deleteHome'){
         let homeIndex = homes.map(e=>e.homeName).indexOf(msg.home.homeName)
         if(homeIndex !== -1){
-          homes[homeIndex].splice(homeIndex,1)
+          homes.splice(homeIndex,1)
         }
         me.send('notice-vice', {
           status: 'getHomes',
@@ -288,7 +288,10 @@ ipc.on('notice-main',(event, arg)=>{
       server.send(JSON.stringify({
         status: 'homeChanged',
         // homes: homes
-        home: currentHome
+        home: {
+          homeName: arg.homeName,
+          members: [IPAddress]
+        }
       }),'8066',multicastAddr)
     }
   }else if(arg.status == 'exitHome'){
@@ -303,12 +306,13 @@ ipc.on('notice-main',(event, arg)=>{
               status: 'deleteHome',
               home: home2
             }),'8066',multicastAddr)
+        }else{
+          server.send(JSON.stringify({
+            status: 'homeChanged',
+            // homes: homes
+            home: home2
+          }),'8066',multicastAddr)
         }
-        server.send(JSON.stringify({
-          status: 'homeChanged',
-          // homes: homes
-          home: home2
-        }),'8066',multicastAddr)
     }
     
     currentHome = null
