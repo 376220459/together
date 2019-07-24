@@ -503,27 +503,33 @@ export default {
       this.colorStyle[index] = `background:white;border:7px solid ${color};`
     },
     exitDraw(){
-      if(this.internet){
-        this.drawShow = 'none'
-        this.color = 'black'
-        this.colorStyle = [,,,,'background:white;border:7px solid black;']
+      this.drawShow = 'none'
+      this.color = 'black'
+      this.colorStyle = [,,,,'background:white;border:7px solid black;']
 
 
 
-        // this.ws.send(JSON.stringify({
-        //     status: 'exitDraw',
-        //     ip: this.ip,
-        //     otherAddress: this.otherAddress
-        // }));
-        // this.otherAddress = ''
-      }else{
-        this.drawShow = 'none'
-        ipc.send('notice-main', {
-          status: 'exitDraw',
-          otherAddress: this.otherAddress
-        })
-        this.otherAddress = ''
-      }
+      // if(this.internet){
+      //   this.drawShow = 'none'
+      //   this.color = 'black'
+      //   this.colorStyle = [,,,,'background:white;border:7px solid black;']
+
+
+
+      //   // this.ws.send(JSON.stringify({
+      //   //     status: 'exitDraw',
+      //   //     ip: this.ip,
+      //   //     otherAddress: this.otherAddress
+      //   // }));
+      //   // this.otherAddress = ''
+      // }else{
+      //   this.drawShow = 'none'
+      //   ipc.send('notice-main', {
+      //     status: 'exitDraw',
+      //     otherAddress: this.otherAddress
+      //   })
+      //   this.otherAddress = ''
+      // }
     },
     initPen(){
       let canvas = document.getElementById('canvas')

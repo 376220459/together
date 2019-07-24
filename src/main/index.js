@@ -156,7 +156,20 @@ function openLocalnet(){
           homes: homes
         })
       }else if(msg.status == 'homeChanged'){
-        homes = msg.homes
+        // homes = msg.homes
+        let homeIndex = homes.map(e=>e.homeName).indexOf(msg.home.homeName)
+        if(homeIndex !== -1){
+          homes[homeIndex] = msg.home
+        }
+        me.send('notice-vice', {
+          status: 'getHomes',
+          homes: homes
+        })
+      }else if(msg.status == 'deleteHome'){
+        let homeIndex = homes.map(e=>e.homeName).indexOf(msg.home.homeName)
+        if(homeIndex !== -1){
+          homes[homeIndex].splice(homeIndex,1)
+        }
         me.send('notice-vice', {
           status: 'getHomes',
           homes: homes
@@ -239,7 +252,11 @@ ipc.on('notice-main',(event, arg)=>{
         
         server.send(JSON.stringify({
           status: 'homeChanged',
-          homes: homes
+          // homes: homes
+          home: {
+              homeName: arg.homeName,
+              members: [IPAddress]
+          }
         }),'8066',multicastAddr)
 
         me.send('notice-vice', {
@@ -270,22 +287,30 @@ ipc.on('notice-main',(event, arg)=>{
       homes[homeIndex].members.push(IPAddress)
       server.send(JSON.stringify({
         status: 'homeChanged',
-        homes: homes
+        // homes: homes
+        home: currentHome
       }),'8066',multicastAddr)
     }
   }else if(arg.status == 'exitHome'){
-    currentHome = null
     let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
     let memberIndex = homes[homeIndex].members.indexOf(IPAddress)
     if(memberIndex !== -1){
+        let home2 = homes[homeIndex]
         homes[homeIndex].members.splice(memberIndex,1)
         if(!homes[homeIndex].members.length){
             homes.splice(homeIndex,1)
+            server.send(JSON.stringify({
+              status: 'deleteHome',
+              home: home2
+            }),'8066',multicastAddr)
         }
         server.send(JSON.stringify({
           status: 'homeChanged',
-          homes: homes
+          // homes: homes
+          home: home2
         }),'8066',multicastAddr)
     }
+    
+    currentHome = null
   }
 })
