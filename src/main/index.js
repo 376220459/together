@@ -135,11 +135,25 @@ function openLocalnet(){
           status: 'exitDraw'
         })
       }else if(msg.status == 'getHomes'){
-        if(currentHome){
-          server.send(JSON.stringify({
-            status: 'putHome',
-            home: currentHome
-          }),'8066',rinfo.address);
+        server.send(JSON.stringify({
+          status: 'giveHomes',
+          homes: homes
+        }),'8066',rinfo.address);
+
+
+        // if(currentHome){
+        //   server.send(JSON.stringify({
+        //     status: 'putHome',
+        //     home: currentHome
+        //   }),'8066',rinfo.address);
+        // }
+      }else if(msg.status == 'giveHomes'){
+        if(msg.homes){
+          homes = msg.homes
+          me.send('notice-vice', {
+            status: 'updateHomes',
+            homes: homes
+          })
         }
       }else if(msg.status == 'putHome'){
         if(homes.map(e=>e.homeName).indexOf(msg.home.homeName) === -1){
@@ -212,7 +226,7 @@ function openLocalnet(){
             changedHome: homes[homeIndex]
           })
         }
-      }else if(msg.status = 'exitHome'){
+      }else if(msg.status == 'exitHome'){
         if(rinfo.address === IPAddress){
           currentHome = null
         }
@@ -268,6 +282,14 @@ function openLocalnet(){
         //   status: 'updateHomes',
         //   homes: homes
         // })
+      }else if(msg.status == 'updateHomes'){
+        if(JSON.stringify(homes) != JSON.stringify(msg.homes)){
+          homes = msg.homes
+          me.send('notice-vice', {
+            status: 'updateHomes',
+            homes: homes
+          })
+        }
       }
   })
 
@@ -334,17 +356,39 @@ ipc.on('notice-main',(event, arg)=>{
   }else if(arg.status == 'openLocalnet'){
     openLocalnet()
   }else if(arg.status == 'getHomes'){
+    // server.send(JSON.stringify({
+    //   status: 'getHomes'
+    // }),'8066',multicastAddr)
+
+
+    
     server.send(JSON.stringify({
       status: 'getHomes'
     }),'8066',multicastAddr)
   }else if(arg.status == 'createHome'){
-    server.send(JSON.stringify({
+    homes.push({
+      homeName: arg.homeName,
+      members: [IPAddress]
+    })
+    me.send('notice-vice', {
       status: 'createHome',
-      home: {
-        homeName: arg.homeName,
-        members: [IPAddress]
-      }
+      homes: homes
+    })
+    server.send(JSON.stringify({
+      status: 'updateHomes',
+      homes: homes
     }),'8066',multicastAddr)
+
+    
+
+
+    // server.send(JSON.stringify({
+    //   status: 'createHome',
+    //   home: {
+    //     homeName: arg.homeName,
+    //     members: [IPAddress]
+    //   }
+    // }),'8066',multicastAddr)
 
 
 

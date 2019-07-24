@@ -178,6 +178,15 @@ export default {
           message: '房间列表已刷新',
           duration: 1000
         })
+
+        // ipc.send('notice-main', {
+        //   status: 'getHomes'
+        // })
+        // this.$message({
+        //   type: 'success',
+        //   message: '房间列表已刷新',
+        //   duration: 1000
+        // })
       }
     },
     openInternet(){
@@ -354,22 +363,30 @@ export default {
           // this.$set(this.homes,0,...arg.homes)
           console.log('房间列表更新')
         }else if(arg.status == 'createHome'){
-          // this.homes = arg.homes
-          this.homes.push(arg.changedHome)
-          this.currentHome = arg.newHomeName
-          this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
+          this.homes = arg.homes
+          this.currentHome = this.homes[this.homes.length - 1].homeName
           this.openDraw()
+
+
+
+          // // this.homes = arg.homes
+          // this.homes.push(arg.changedHome)
+          // this.currentHome = arg.newHomeName
+          // this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
+          // this.openDraw()
           
           // console.log('创建'+this.homes.map(e=>e.homeName))
           // console.log(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
           // this.enterHome(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
         }else if(arg.status == 'updateHomes'){
-          // this.homes = arg.homes
-          let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.changedHome.homeName)
-          // this.homes[homeIndex] = arg.changedHome
-          this.$set(this.homes,homeIndex,arg.changedHome)
+          this.homes = arg.homes
           console.log('房间列表更新')
-          // console.log(this.homes.map(e=>e.homeName))
+
+
+
+          // let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.changedHome.homeName)
+          // this.$set(this.homes,homeIndex,arg.changedHome)
+          // console.log('房间列表更新')
         }else if(arg.status == 'enterHome'){
           // console.log(arg.enterHomeName)
           // this.homes = arg.homes
@@ -423,6 +440,10 @@ export default {
           status: 'createHome',
           homeName: this.newHomeName
         })
+
+        // this.currentHome = this.newHomeName
+        // this.openDraw()
+
         this.closeCreateHome()
       }
     },
