@@ -362,7 +362,7 @@ export default {
         }else if(arg.status == 'updateHomes'){
           this.homes = arg.homes
           console.log('房间列表更新')
-          // console.log(this.homes.map(e=>e.homeName))
+          console.log(this.homes.map(e=>e.homeName))
         }else if(arg.status == 'enterHome'){
           console.log(arg.enterHomeName)
           this.homes = arg.homes
