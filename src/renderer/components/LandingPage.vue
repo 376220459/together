@@ -347,7 +347,7 @@ export default {
           this.drawShow = 'none'
           this.otherAddress = ''
         }else if(arg.status == 'getHomes'){
-          console.log(arg.homes)
+          // console.log(arg.homes)
           this.homes = arg.homes
           // this.homes = []
           // this.$set(this.homes,0,...arg.homes)
@@ -356,6 +356,8 @@ export default {
           this.homes = arg.homes
           this.currentHome = arg.newHomeName
           this.currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
+          
+          console.log('创建'+this.homes.map(e=>e.homeName))
           this.openDraw()
           // console.log(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
           // this.enterHome(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
