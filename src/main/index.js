@@ -276,24 +276,25 @@ ipc.on('notice-main',(event, arg)=>{
     //   home: currentHome
     // }),'8066',multicastAddr)
   }else if(arg.status == 'enterHome'){
-    currentHome = {
-      homeName: arg.homeName,
-      members: [IPAddress]
-    }
-
     let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
-
     if(homes[homeIndex].members.indexOf(IPAddress) === -1){
       homes[homeIndex].members.push(IPAddress)
-      server.send(JSON.stringify({
-        status: 'homeChanged',
-        // homes: homes
-        home: {
-          homeName: arg.homeName,
-          members: [IPAddress]
-        }
-      }),'8066',multicastAddr)
+      currentHome = {
+        homeName: arg.homeName,
+        members: homes[homeIndex].members
+      }
+    }else{
+      currentHome = {
+        homeName: arg.homeName,
+        members: [IPAddress]
+      }
     }
+    
+    server.send(JSON.stringify({
+      status: 'homeChanged',
+      // homes: homes
+      home: currentHome
+    }),'8066',multicastAddr)
   }else if(arg.status == 'exitHome'){
     let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
     let memberIndex = homes[homeIndex].members.indexOf(IPAddress)
