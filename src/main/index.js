@@ -236,10 +236,28 @@ function openLocalnet(){
             }
           }
         }
+        
+        if(rinfo.address === IPAddress){
+          currentHome = null
+        }
         me.send('notice-vice', {
           status: 'updateHomes',
           homes: homes
         })
+
+        // if(homeIndex !== -1){
+        //   let memberIndex = homes[homeIndex].members.indexOf(msg.ip)
+        //   if(memberIndex !== -1){
+        //     homes[homeIndex].members.splice(memberIndex,1)//注意：splice方法返回的是被删除的元素组成的数组，而不是删除后的数组
+        //     if(!homes[homeIndex].members.length){
+        //       homes.splice(homeIndex,1)
+        //     }
+        //   }
+        // }
+        // me.send('notice-vice', {
+        //   status: 'updateHomes',
+        //   homes: homes
+        // })
       }
   })
 

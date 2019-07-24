@@ -347,6 +347,7 @@ export default {
           this.drawShow = 'none'
           this.otherAddress = ''
         }else if(arg.status == 'getHomes'){
+          console.log(arg.homes)
           this.homes = arg.homes
           // this.homes = []
           // this.$set(this.homes,0,...arg.homes)
@@ -361,6 +362,7 @@ export default {
         }else if(arg.status == 'updateHomes'){
           this.homes = arg.homes
           console.log('房间列表更新')
+          // console.log(this.homes.map(e=>e.homeName))
         }else if(arg.status == 'enterHome'){
           console.log(arg.enterHomeName)
           this.homes = arg.homes
