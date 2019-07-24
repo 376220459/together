@@ -279,10 +279,7 @@ ipc.on('notice-main',(event, arg)=>{
     let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
     if(homes[homeIndex].members.indexOf(IPAddress) === -1){
       homes[homeIndex].members.push(IPAddress)
-      currentHome = {
-        homeName: arg.homeName,
-        members: homes[homeIndex].members
-      }
+      currentHome = homes[homeIndex]
     }else{
       currentHome = {
         homeName: arg.homeName,
@@ -317,5 +314,9 @@ ipc.on('notice-main',(event, arg)=>{
     }
     
     currentHome = null
+    
+    server.send(JSON.stringify({
+      status: 'getHomes'
+    }),'8066',multicastAddr)
   }
 })
