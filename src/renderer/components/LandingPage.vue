@@ -364,9 +364,9 @@ export default {
         }else if(arg.status == 'updateHomes'){
           // this.homes = arg.homes
           let homeIndex = this.homes.map(e=>e.homeName).indexOf(arg.changedHome.homeName)
-          this.homes[homeIndex] = arg.changedHome
+          // this.homes[homeIndex] = arg.changedHome
+          this.$set(this.homes,homeIndex,arg.changedHome)
           console.log('房间列表更新')
-          // this.$set(this.homes,homeIndex,arg.changedHome)
           // console.log(this.homes.map(e=>e.homeName))
         }else if(arg.status == 'enterHome'){
           // console.log(arg.enterHomeName)
