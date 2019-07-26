@@ -73,7 +73,7 @@ import {Internet} from './internet'
 let localnet = new Localnet(),
     internet = new Internet()
 
-const ipc = require('electron').ipcRenderer
+// const ipc = require('electron').ipcRenderer
 
 function debounce(func,wait){
   let id = null;
@@ -102,6 +102,7 @@ export default {
     return {
       pens:{},
       localnetOpened: false,
+      ipc: null,
       ws: null,
       internet: false,
       localnet: false,
@@ -528,11 +529,12 @@ export default {
     // }
   },
   mounted() {
-    ipc.send('notice-main', {
+    this.ipc = require('electron').ipcRenderer
+    this.ipc.send('notice-main', {
       status: 'getIP'
     })
 
-    ipc.on('notice-ip', (event, arg)=>{
+    this.ipc.on('notice-ip', (event, arg)=>{
       if(arg.status == 'getIP'){
         this.ip = arg.ip
       }
