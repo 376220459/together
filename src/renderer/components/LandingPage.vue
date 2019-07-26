@@ -34,7 +34,7 @@
         <ul v-if="homes.length ? true :false">
           <li class="home-item" v-for="(item, index) in homes" :key="index">
             <div style="cursor: pointer;">||房间{{ index + 1 }}：{{ item.homeName }}({{ item.members.length }}人)</div>
-            <el-button round type="success" @click="enterHome(item.homeName,index)">进入</el-button>
+            <el-button round type="success" @click="enterHome(item.homeName)">进入</el-button>
           </li>
         </ul>
       </div>
@@ -46,7 +46,7 @@
         <ul v-if="homes.length ? true :false">
           <li class="home-item" v-for="(item, index) in homes" :key="index">
             <div style="cursor: pointer;">||房间{{ index + 1 }}：{{ item.homeName }}({{ item.members.length }}人)</div>
-            <el-button round type="success" @click="enterHome(item.homeName,index)">进入</el-button>
+            <el-button round type="success" @click="enterHome(item.homeName)">进入</el-button>
           </li>
         </ul>
       </div>
@@ -67,7 +67,12 @@
 </template>
 
 <script>
-import { fail } from 'assert';
+// import { fail } from 'assert';
+import {Localnet} from './localnet'
+import {Internet} from './internet'
+let localnet = new Localnet(),
+    internet = new Internet()
+
 const ipc = require('electron').ipcRenderer
 
 function debounce(func,wait){
@@ -120,18 +125,12 @@ export default {
   methods: {
     changeNet(){
       if(this.internet){
-        if(this.otherAddress){
-          this.exitDraw()
-        }
         this.internet = false
         this.localnet = true
 
         this.ws.close()
         this.openLocalnet()
       }else{
-        if(this.otherAddress){
-          this.exitDraw()
-        }
         this.localnet = false
         this.internet = true
         ipc.removeAllListeners('notice-vice')
@@ -141,10 +140,7 @@ export default {
     },
     getHomes(){
       if(this.internet){
-        this.ws.send(JSON.stringify({
-            status: 'getHomes',
-            ip: this.ip
-        }));
+        internet.getHomes(this)
       }else{
         ipc.send('notice-main', {
           status: 'getHomes'
@@ -156,46 +152,66 @@ export default {
         })
       }
     },
+    // getHomes(){
+    //   if(this.internet){
+    //     this.ws.send(JSON.stringify({
+    //         status: 'getHomes',
+    //         ip: this.ip
+    //     }));
+    //   }else{
+    //     ipc.send('notice-main', {
+    //       status: 'getHomes'
+    //     })
+    //     this.$message({
+    //       type: 'success',
+    //       message: '房间列表已刷新',
+    //       duration: 1000
+    //     })
+    //   }
+    // },
     openInternet(){
-        this.ws = new WebSocket(`ws://192.168.1.196:8888?ip=${this.ip}`)
-        // this.ws = new WebSocket(`ws://192.168.16.102:8888?ip=${this.ip}`)
-        this.ws.onmessage = e=>{
-            let obj = JSON.parse(e.data)
-            if(obj.status == 'addNewHome'){
-              this.homes = obj.homes
-              this.enterHome(this.homes[this.homes.length - 1].homeName,this.homes.length - 1)
-            }else if(obj.status == 'getHomes'){
-              this.homes = obj.homes
-              this.$message({
-                type: 'success',
-                message: '房间列表已刷新',
-                duration: 1000
-              })
-              if(this.currentHome){
-                this.initPen()
-              }
-            }else if(obj.status == 'otherStart'){
-              this.otherStart(obj.e)
-            }else if(obj.status == 'otherDrawing'){
-              this.otherDrawing(obj.e)
-            }else if(obj.status == 'otherStop'){
-              this.otherStop(obj.e)
-            }
-        }
-        this.ws.onopen = ()=>{
-            console.log('ws通道已打开')
-            if(this.ws.readyState === 1){
-                this.ws.send(JSON.stringify({
-                    status: 'connect',
-                    ip: this.ip
-                }));
-                this.getHomes()
-            }
-        }
-        this.ws.onclose = ()=>{
-            console.log('ws通道已关闭');
-        }
+        internet.openInternet(this)
     },
+    // openInternet(){
+    //     this.ws = new WebSocket(`ws://192.168.1.196:8888?ip=${this.ip}`)
+    //     // this.ws = new WebSocket(`ws://192.168.16.102:8888?ip=${this.ip}`)
+    //     this.ws.onmessage = e=>{
+    //         let obj = JSON.parse(e.data)
+    //         if(obj.status == 'addNewHome'){
+    //           this.homes = obj.homes
+    //           this.enterHome(this.homes[this.homes.length - 1].homeName)
+    //         }else if(obj.status == 'getHomes'){
+    //           this.homes = obj.homes
+    //           this.$message({
+    //             type: 'success',
+    //             message: '房间列表已刷新',
+    //             duration: 1000
+    //           })
+    //           if(this.currentHome){
+    //             this.initPen()
+    //           }
+    //         }else if(obj.status == 'otherStart'){
+    //           this.otherStart(obj.e)
+    //         }else if(obj.status == 'otherDrawing'){
+    //           this.otherDrawing(obj.e)
+    //         }else if(obj.status == 'otherStop'){
+    //           this.otherStop(obj.e)
+    //         }
+    //     }
+    //     this.ws.onopen = ()=>{
+    //         console.log('ws通道已打开')
+    //         if(this.ws.readyState === 1){
+    //             this.ws.send(JSON.stringify({
+    //                 status: 'connect',
+    //                 ip: this.ip
+    //             }));
+    //             this.getHomes()
+    //         }
+    //     }
+    //     this.ws.onclose = ()=>{
+    //         console.log('ws通道已关闭');
+    //     }
+    // },
     openLocalnet(){
       if(!this.localnetOpened){
         this.localnetOpened = true
@@ -242,17 +258,7 @@ export default {
         return
       }
       if(this.internet){ 
-        this.$message({
-          type: 'success',
-          message: '创建成功',
-          duration: 1000
-        })
-        this.ws.send(JSON.stringify({
-            status: 'addNewHome',
-            homeName: this.newHomeName,
-            ip: this.ip
-        }));
-        this.closeCreateHome()
+        internet.createHome(this)
       }else{
         this.$message({
           type: 'success',
@@ -266,16 +272,40 @@ export default {
         this.closeCreateHome()
       }
     },
-    enterHome(item,index){
+    // createHome(){
+    //   this.newHomeName = this.newHomeName.trim()
+    //   if(this.newHomeName == '' || this.homes.map(e=>e.homeName).indexOf(this.newHomeName) !== -1){
+    //     this.$message.error('创建失败，换个名字试试')
+    //     return
+    //   }
+    //   if(this.internet){ 
+    //     this.$message({
+    //       type: 'success',
+    //       message: '创建成功',
+    //       duration: 1000
+    //     })
+    //     this.ws.send(JSON.stringify({
+    //         status: 'addNewHome',
+    //         homeName: this.newHomeName,
+    //         ip: this.ip
+    //     }));
+    //     this.closeCreateHome()
+    //   }else{
+    //     this.$message({
+    //       type: 'success',
+    //       message: '创建成功',
+    //       duration: 1000
+    //     })
+    //     ipc.send('notice-main', {
+    //       status: 'createHome',
+    //       homeName: this.newHomeName
+    //     })
+    //     this.closeCreateHome()
+    //   }
+    // },
+    enterHome(item){
       if(this.internet){
-        this.currentHomeIndex = index
-        this.currentHome = item
-        this.openDraw()
-        this.ws.send(JSON.stringify({
-            status: 'enterHome',
-            homeName: this.currentHome,
-            ip: this.ip
-        }));
+        internet.enterHome(item,this)
       }else{
         ipc.send('notice-main', {
           status: 'enterHome',
@@ -283,13 +313,25 @@ export default {
         })
       }
     },
+    // enterHome(item){
+    //   if(this.internet){
+    //     this.currentHome = item
+    //     this.openDraw()
+    //     this.ws.send(JSON.stringify({
+    //         status: 'enterHome',
+    //         homeName: this.currentHome,
+    //         ip: this.ip
+    //     }));
+    //   }else{
+    //     ipc.send('notice-main', {
+    //       status: 'enterHome',
+    //       homeName: item
+    //     })
+    //   }
+    // },
     exitHome(){
       if(this.internet){
-        this.ws.send(JSON.stringify({
-            status: 'exitHome',
-            homeName: this.currentHome,
-            ip: this.ip
-        }));
+        internet.exitHome(this)
       }else{
         ipc.send('notice-main', {
           status: 'exitHome',
@@ -298,9 +340,25 @@ export default {
         })
       }
       this.currentHome = ''
-      this.currentHomeIndex = ''
       this.exitDraw()
     },
+    // exitHome(){
+    //   if(this.internet){
+    //     this.ws.send(JSON.stringify({
+    //         status: 'exitHome',
+    //         homeName: this.currentHome,
+    //         ip: this.ip
+    //     }));
+    //   }else{
+    //     ipc.send('notice-main', {
+    //       status: 'exitHome',
+    //       homeName: this.currentHome,
+    //       ip: this.ip
+    //     })
+    //   }
+    //   this.currentHome = ''
+    //   this.exitDraw()
+    // },
     selectNet(net){
       if(net === 'internet'){
         this.internet = true
@@ -388,17 +446,7 @@ export default {
       let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
       let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
       if(this.internet){
-        this.ws.send(JSON.stringify({
-            status: 'sendStart',
-            homeName: this.currentHome,
-            ip: this.ip,
-            e: {
-              ip: this.ip,
-              clientX: x,
-              clientY: y,
-              color: this.color
-            }
-        }));
+        internet.sendStart(e,x,y,this)
       }else{
         ipc.send('notice-main', {
             status: 'sendStart',
@@ -413,21 +461,40 @@ export default {
         })
       }
     },
+    // sendStart(e){
+    //   let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
+    //   let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
+    //   if(this.internet){
+    //     this.ws.send(JSON.stringify({
+    //         status: 'sendStart',
+    //         homeName: this.currentHome,
+    //         ip: this.ip,
+    //         e: {
+    //           ip: this.ip,
+    //           clientX: x,
+    //           clientY: y,
+    //           color: this.color
+    //         }
+    //     }));
+    //   }else{
+    //     ipc.send('notice-main', {
+    //         status: 'sendStart',
+    //         homeName: this.currentHome,
+    //         ip: this.ip,
+    //         e: {
+    //           ip: this.ip,
+    //           clientX: x,
+    //           clientY: y,
+    //           color: this.color
+    //         }
+    //     })
+    //   }
+    // },
     sendDrawing(e){
       let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
       let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
       if(this.internet){
-        this.ws.send(JSON.stringify({
-            status: 'sendDrawing',
-            homeName: this.currentHome,
-            ip: this.ip,
-            e: {
-              ip: this.ip,
-              clientX: x,
-              clientY: y,
-              color: this.color
-            }
-        }));
+        internet.sendDrawing(e,x,y,this)
       }else{
         ipc.send('notice-main', {
             status: 'sendDrawing',
@@ -442,16 +509,38 @@ export default {
         })
       }
     },
+    // sendDrawing(e){
+    //   let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
+    //   let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
+    //   if(this.internet){
+    //     this.ws.send(JSON.stringify({
+    //         status: 'sendDrawing',
+    //         homeName: this.currentHome,
+    //         ip: this.ip,
+    //         e: {
+    //           ip: this.ip,
+    //           clientX: x,
+    //           clientY: y,
+    //           color: this.color
+    //         }
+    //     }));
+    //   }else{
+    //     ipc.send('notice-main', {
+    //         status: 'sendDrawing',
+    //         homeName: this.currentHome,
+    //         ip: this.ip,
+    //         e: {
+    //           ip: this.ip,
+    //           clientX: x,
+    //           clientY: y,
+    //           color: this.color
+    //         }
+    //     })
+    //   }
+    // },
     sendStop(){
       if(this.internet){
-        this.ws.send(JSON.stringify({
-            status: 'sendStop',
-            homeName: this.currentHome,
-            ip: this.ip,
-            e: {
-              ip: this.ip
-            }
-        }));
+        internet.sendStop(this)
       }else{
         ipc.send('notice-main', {
             status: 'sendStop',
@@ -463,6 +552,27 @@ export default {
         })
       }
     }
+    // sendStop(){
+    //   if(this.internet){
+    //     this.ws.send(JSON.stringify({
+    //         status: 'sendStop',
+    //         homeName: this.currentHome,
+    //         ip: this.ip,
+    //         e: {
+    //           ip: this.ip
+    //         }
+    //     }));
+    //   }else{
+    //     ipc.send('notice-main', {
+    //         status: 'sendStop',
+    //         homeName: this.currentHome,
+    //         ip: this.ip,
+    //         e: {
+    //           ip: this.ip
+    //         }
+    //     })
+    //   }
+    // }
   },
   mounted() {
     ipc.send('notice-main', {
