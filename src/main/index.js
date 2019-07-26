@@ -26,6 +26,9 @@ function createWindow () {
 app.on('ready', createWindow)
 
 app.on('window-all-closed', () => {
+  me.send('notice-close', {
+    status: 'closeWindow'
+  })
   if (process.platform !== 'darwin') {
     app.quit()
   }
@@ -51,7 +54,7 @@ for(var devName in interfaces){
 }
 
 const ipc = require('electron').ipcMain
-let me;//me代表自己（ipc）
+var me;//me代表自己（ipc）
 let dgram,server,multicastAddr
 let homes = []
 function openLocalnet(){
@@ -148,7 +151,6 @@ function openLocalnet(){
           })
         }
       }else if(msg.status == 'updateHomes'){
-        console.log("hahaha")
         if(JSON.stringify(homes) != JSON.stringify(msg.homes)){
           homes = msg.homes
           me.send('notice-vice', {

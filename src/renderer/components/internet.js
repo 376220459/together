@@ -38,7 +38,13 @@ class Internet{
             }
         }
         this.ws.onclose = ()=>{
+            if(that.currentHome){
+                this.exitHome(that)
+            }
             console.log('ws通道已关闭');
+            if(that.internet){
+                this.openInternet()
+            }
         }
     }
     close(){

@@ -40,6 +40,7 @@ let server = ws.createServer(conn=>{
             }
             if(homes[homeIndex].members.indexOf(obj.ip) === -1){
                 homes[homeIndex].members.push(obj.ip)
+                homes[homeIndex].members = [...new Set(homes[homeIndex].members)]
                 server.connections.forEach(conn=>{
                     conn.sendText(JSON.stringify({
                         status: 'getHomes',
