@@ -134,7 +134,7 @@ export default {
       }else{
         this.localnet = false
         this.internet = true
-        ipc.removeAllListeners('notice-vice')
+        this.ipc.removeAllListeners('notice-vice')
         this.openInternet()
       }
       this.homes = []
