@@ -51,7 +51,7 @@ class Localnet{
         })
         that.closeCreateHome()
     }
-    enterHome(item){
+    enterHome(item,that){
         that.ipc.send('notice-main', {
             status: 'enterHome',
             homeName: item

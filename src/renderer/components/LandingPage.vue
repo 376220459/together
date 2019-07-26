@@ -295,7 +295,7 @@ export default {
       if(this.internet){
         internet.enterHome(item,this)
       }else{
-        localnet.enterHome(item)
+        localnet.enterHome(item,this)
       }
     },
     // enterHome(item){
