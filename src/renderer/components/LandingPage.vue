@@ -7,7 +7,7 @@
 
     <div class="create-home" v-if="createHomeIf">
       <i class="el-icon-close" title="关闭" @click="closeCreateHome"></i>
-      <el-input v-model="newHomeName" placeholder="请输入房间名" maxlength="5"></el-input>
+      <el-input v-model="newHomeName" placeholder="请输入房间名" maxlength="9"></el-input>
       <el-button @click="createHome" round type="success">Create</el-button>
     </div>
 
@@ -69,8 +69,10 @@
 <script>
 import {Localnet} from './localnet'
 import {Internet} from './internet'
+import {Transfer} from './transfer'
 let localnet = new Localnet(),
-    internet = new Internet()
+    internet = new Internet(),
+    transfer = new Transfer()
 
 function debounce(func,wait){
   let id = null;
@@ -122,29 +124,35 @@ export default {
   },
   methods: {
     changeNet(){
-      if(this.internet){
-        this.internet = false
-        this.localnet = true
+      transfer.changeNet()
+    },
+    // changeNet(){
+    //   if(this.internet){
+    //     this.internet = false
+    //     this.localnet = true
 
-        internet.close()
-        this.openLocalnet()
-      }else{
-        this.localnet = false
-        this.internet = true
-        this.ipc.removeAllListeners('notice-vice')
-        this.openInternet()
-      }
-      this.homes = []
-    },
+    //     internet.close()
+    //     this.openLocalnet()
+    //   }else{
+    //     this.localnet = false
+    //     this.internet = true
+    //     this.ipc.removeAllListeners('notice-vice')
+    //     this.openInternet()
+    //   }
+    //   this.homes = []
+    // },
     getHomes(){
-      if(this.internet){
-        internet.getHomes(this)
-      }else{
-        localnet.getHomes(this)
-      }
+      transfer.getHomes()
     },
+    // getHomes(){
+    //   if(this.internet){
+    //     internet.getHomes(this)
+    //   }else{
+    //     localnet.getHomes(this)
+    //   }
+    // },
     openInternet(){
-        internet.openInternet(this)
+      internet.openInternet(this)
     },
     openLocalnet(){
       localnet.openLocalnet(this)
@@ -157,161 +165,213 @@ export default {
       this.newHomeName = ''
     },
     createHome(){
-      this.newHomeName = this.newHomeName.trim()
-      if(this.newHomeName == '' || this.homes.map(e=>e.homeName).indexOf(this.newHomeName) !== -1){
-        this.$message.error('创建失败，换个名字试试')
-        return
-      }
-      if(this.internet){ 
-        internet.createHome(this)
-      }else{
-        localnet.createHome(this)
-      }
+      transfer.createHome()
     },
+    // createHome(){
+    //   this.newHomeName = this.newHomeName.trim()
+    //   if(this.newHomeName == '' || this.homes.map(e=>e.homeName).indexOf(this.newHomeName) !== -1){
+    //     this.$message.error('创建失败，换个名字试试')
+    //     return
+    //   }
+    //   if(this.internet){ 
+    //     internet.createHome(this)
+    //   }else{
+    //     localnet.createHome(this)
+    //   }
+    // },
     enterHome(item){
-      if(this.internet){
-        internet.enterHome(item,this)
-      }else{
-        localnet.enterHome(item,this)
-      }
+      transfer.enterHome(item)
     },
+    // enterHome(item){
+    //   if(this.internet){
+    //     internet.enterHome(item,this)
+    //   }else{
+    //     localnet.enterHome(item,this)
+    //   }
+    // },
     exitHome(){
-      if(this.internet){
-        internet.exitHome(this)
-      }else{
-        localnet.exitHome(this)
-      }
-      this.currentHome = ''
-      this.exitDraw()
+      transfer.exitHome()
     },
+    // exitHome(){
+    //   if(this.internet){
+    //     internet.exitHome(this)
+    //   }else{
+    //     localnet.exitHome(this)
+    //   }
+    //   this.currentHome = ''
+    //   this.exitDraw()
+    // },
     selectNet(net){
-      if(net === 'internet'){
-        this.internet = true
-        this.openInternet()
-      }else{
-        this.localnet = true
-        this.openLocalnet()
-      }
+      transfer.selectNet(net)
     },
+    // selectNet(net){
+    //   if(net === 'internet'){
+    //     this.internet = true
+    //     this.openInternet()
+    //   }else{
+    //     this.localnet = true
+    //     this.openLocalnet()
+    //   }
+    // },
     changeColor(color,index){
-      this.color = color
-      this.colorStyle = []
-      this.colorStyle[index] = `background:white;border:7px solid ${color};`
+      transfer.changeColor(color,index)
     },
+    // changeColor(color,index){
+    //   this.color = color
+    //   this.colorStyle = []
+    //   this.colorStyle[index] = `background:white;border:7px solid ${color};`
+    // },
     exitDraw(){
-      this.drawShow = 'none'
-      this.color = 'black'
-      this.colorStyle = [,,,,'background:white;border:7px solid black;']
+      transfer.exitDraw()
     },
+    // exitDraw(){
+    //   this.drawShow = 'none'
+    //   this.color = 'black'
+    //   this.colorStyle = [,,,,'background:white;border:7px solid black;']
+    // },
     initPen(){
-      let canvas = document.getElementById('canvas')
-      let canvasDiv = document.getElementById('canvasDiv')
-      let currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
-      if(this.currentHome){
-        if(currentHomeIndex === -1){
-          return
-        }
-        this.homes[currentHomeIndex].members.forEach(e=>{
-          this.pens[e] = {}
-          this.pens[e].ctx = canvas.getContext("2d")
-          this.pens[e].ctx.lineWidth = 3
-          this.pens[e].path = new Path2D()
-          this.pens[e].tag = false
-        })
-      }
+      transfer.initPen()
     },
+    // initPen(){
+    //   let canvas = document.getElementById('canvas')
+    //   let canvasDiv = document.getElementById('canvasDiv')
+    //   let currentHomeIndex = this.homes.map(e=>e.homeName).indexOf(this.currentHome)
+    //   if(this.currentHome){
+    //     if(currentHomeIndex === -1){
+    //       return
+    //     }
+    //     this.homes[currentHomeIndex].members.forEach(e=>{
+    //       this.pens[e] = {}
+    //       this.pens[e].ctx = canvas.getContext("2d")
+    //       this.pens[e].ctx.lineWidth = 3
+    //       this.pens[e].path = new Path2D()
+    //       this.pens[e].tag = false
+    //     })
+    //   }
+    // },
     openDraw(){
-      if(this.drawShow == 'none'){
-        this.drawShow = 'block'
-        let canvas = document.getElementById('canvas')
-        let canvasDiv = document.getElementById('canvasDiv')
-        setTimeout(() => {
-          canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
-          canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
-        }, 0);
-        this.ctx = canvas.getContext("2d")
-        this.ctx.lineWidth = 3
-        this.initPen()
-      }
+      transfer.openDraw()
     },
+    // openDraw(){
+    //   if(this.drawShow == 'none'){
+    //     this.drawShow = 'block'
+    //     let canvas = document.getElementById('canvas')
+    //     let canvasDiv = document.getElementById('canvasDiv')
+    //     setTimeout(() => {
+    //       canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
+    //       canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
+    //     }, 0);
+    //     this.ctx = canvas.getContext("2d")
+    //     this.ctx.lineWidth = 3
+    //     this.initPen()
+    //   }
+    // },
     start(e){
-      let canvasDiv = document.getElementById('canvasDiv')
-      this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
-      this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
-      this.path = new Path2D()
-      this.path.moveTo(this.x,this.y)
-      this.tag = true
+      transfer.start(e)
     },
+    // start(e){
+    //   let canvasDiv = document.getElementById('canvasDiv')
+    //   this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
+    //   this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
+    //   this.path = new Path2D()
+    //   this.path.moveTo(this.x,this.y)
+    //   this.tag = true
+    // },
     otherStart(e){
-      this.pens[e.ip].path = new Path2D()
-      this.pens[e.ip].path.moveTo(e.clientX,e.clientY)
-      this.pens[e.ip].tag = true
+      transfer.otherStart(e)
     },
+    // otherStart(e){
+    //   this.pens[e.ip].path = new Path2D()
+    //   this.pens[e.ip].path.moveTo(e.clientX,e.clientY)
+    //   this.pens[e.ip].tag = true
+    // },
     drawing(e){
-      let canvasDiv = document.getElementById('canvasDiv')
-      if(this.tag){
-        this.ctx.strokeStyle = this.color
-        this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
-        this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
-        this.path.lineTo(this.x,this.y)
-        this.ctx.stroke(this.path)
-      }
+      transfer.drawing(e)
     },
+    // drawing(e){
+    //   let canvasDiv = document.getElementById('canvasDiv')
+    //   if(this.tag){
+    //     this.ctx.strokeStyle = this.color
+    //     this.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
+    //     this.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
+    //     this.path.lineTo(this.x,this.y)
+    //     this.ctx.stroke(this.path)
+    //   }
+    // },
     otherDrawing(e){
-      if(this.pens[e.ip].tag){
-        this.pens[e.ip].ctx.strokeStyle = e.color
-        this.pens[e.ip].path.lineTo(e.clientX,e.clientY)
-        this.pens[e.ip].ctx.stroke(this.pens[e.ip].path)
-      }
+      transfer.otherDrawing(e)
     },
+    // otherDrawing(e){
+    //   if(this.pens[e.ip].tag){
+    //     this.pens[e.ip].ctx.strokeStyle = e.color
+    //     this.pens[e.ip].path.lineTo(e.clientX,e.clientY)
+    //     this.pens[e.ip].ctx.stroke(this.pens[e.ip].path)
+    //   }
+    // },
     stop(){
-      this.tag = false
+      transfer.stop()
     },
+    // stop(){
+    //   this.tag = false
+    // },
     otherStop(e){
-      this.pens[e.ip].tag = false
+      transfer.otherStop(e)
     },
+    // otherStop(e){
+    //   this.pens[e.ip].tag = false
+    // },
     sendStart(e){
-      let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
-      let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
-      if(this.internet){
-        internet.sendStart(x,y,this)
-      }else{
-        localnet.sendStart(x,y,this)
-      }
+      transfer.sendStart(e)
     },
+    // sendStart(e){
+    //   let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
+    //   let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
+    //   if(this.internet){
+    //     internet.sendStart(x,y,this)
+    //   }else{
+    //     localnet.sendStart(x,y,this)
+    //   }
+    // },
     sendDrawing(e){
-      let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
-      let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
-      if(this.internet){
-        internet.sendDrawing(x,y,this)
-      }else{
-        localnet.sendDrawing(x,y,this)
-      }
+      transfer.sendDrawing(e)
     },
+    // sendDrawing(e){
+    //   let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
+    //   let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
+    //   if(this.internet){
+    //     internet.sendDrawing(x,y,this)
+    //   }else{
+    //     localnet.sendDrawing(x,y,this)
+    //   }
+    // },
     sendStop(){
-      if(this.internet){
-        internet.sendStop(this)
-      }else{
-        localnet.sendStop(this)
-      }
+      transfer.sendStop()
     }
+    // sendStop(){
+    //   if(this.internet){
+    //     internet.sendStop(this)
+    //   }else{
+    //     localnet.sendStop(this)
+    //   }
+    // }
   },
   mounted() {
-    this.ipc = require('electron').ipcRenderer
-    this.ipc.send('notice-main', {
-      status: 'getIP'
-    })
+    transfer.init(this)
+    // this.ipc = require('electron').ipcRenderer
+    // this.ipc.send('notice-main', {
+    //   status: 'getIP'
+    // })
 
-    this.ipc.on('notice-ip', (event, arg)=>{
-      if(arg.status == 'getIP'){
-        this.ip = arg.ip
-      }
-    })
-    this.ipc.on('notice-close', (event, arg)=>{
-      if(arg.status == 'closeWindow'){
-        this.exitHome()
-      }
-    })
+    // this.ipc.on('notice-ip', (event, arg)=>{
+    //   if(arg.status == 'getIP'){
+    //     this.ip = arg.ip
+    //   }
+    // })
+    // this.ipc.on('notice-close', (event, arg)=>{
+    //   if(arg.status == 'closeWindow'){
+    //     this.exitHome()
+    //   }
+    // })
   }
 }
 </script>

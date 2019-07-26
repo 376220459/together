@@ -1,12 +1,16 @@
+let that
 class Localnet{
-    openLocalnet(that){
+    init(context){
+        that = context
+    }
+    openLocalnet(){
         if(!that.localnetOpened){
             that.localnetOpened = true
             that.ipc.send('notice-main', {
                 status: 'openLocalnet'
             })
         }
-        this.getHomes(that)
+        this.getHomes()
         that.ipc.on('notice-vice', (event, arg)=>{
             if(arg.status == 'otherStart'){
                 that.otherStart(arg.e)
@@ -29,7 +33,7 @@ class Localnet{
             }
         })
     }
-    getHomes(that){
+    getHomes(){
         that.ipc.send('notice-main', {
             status: 'getHomes'
         })
@@ -39,7 +43,7 @@ class Localnet{
             duration: 1000
         })
     }
-    createHome(that){
+    createHome(){
         that.$message({
             type: 'success',
             message: '创建成功',
@@ -51,20 +55,20 @@ class Localnet{
         })
         that.closeCreateHome()
     }
-    enterHome(item,that){
+    enterHome(item){
         that.ipc.send('notice-main', {
             status: 'enterHome',
             homeName: item
         })
     }
-    exitHome(that){
+    exitHome(){
         that.ipc.send('notice-main', {
             status: 'exitHome',
             homeName: that.currentHome,
             ip: that.ip
         })
     }
-    sendStart(x,y,that){
+    sendStart(x,y){
         that.ipc.send('notice-main', {
             status: 'sendStart',
             homeName: that.currentHome,
@@ -77,7 +81,7 @@ class Localnet{
             }
         })
     }
-    sendDrawing(x,y,that){
+    sendDrawing(x,y){
         that.ipc.send('notice-main', {
             status: 'sendDrawing',
             homeName: that.currentHome,
@@ -90,7 +94,7 @@ class Localnet{
             }
         })
     }
-    sendStop(that){
+    sendStop(){
         that.ipc.send('notice-main', {
             status: 'sendStop',
             homeName: that.currentHome,

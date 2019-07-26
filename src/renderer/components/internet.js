@@ -1,10 +1,14 @@
+let ws,that
 class Internet{
-    openInternet(that){
-        this.ws = new WebSocket(`ws://172.20.10.3:8888?ip=${that.ip}`)
-        // this.ws = new WebSocket(`ws://192.168.1.183:8888?ip=${that.ip}`)
-        // this.ws = new WebSocket(`ws://192.168.1.196:8888?ip=${that.ip}`)
-        // this.ws = new WebSocket(`ws://192.168.16.102:8888?ip=${that.ip}`)
-        this.ws.onmessage = e=>{
+    init(context){
+        that = context
+    }
+    openInternet(){
+        // ws = new WebSocket(`ws://172.20.10.3:8888?ip=${that.ip}`)
+        // ws = new WebSocket(`ws://192.168.1.183:8888?ip=${that.ip}`)
+        // ws = new WebSocket(`ws://192.168.1.196:8888?ip=${that.ip}`)
+        ws = new WebSocket(`ws://192.168.16.101:8888?ip=${that.ip}`)
+        ws.onmessage = e=>{
             let obj = JSON.parse(e.data)
             if(obj.status == 'addNewHome'){
                 that.homes = obj.homes
@@ -27,19 +31,19 @@ class Internet{
                 that.otherStop(obj.e)
             }
         }
-        this.ws.onopen = ()=>{
+        ws.onopen = ()=>{
             console.log('ws通道已打开')
-            if(this.ws.readyState === 1){
-                this.ws.send(JSON.stringify({
+            if(ws.readyState === 1){
+                ws.send(JSON.stringify({
                     status: 'connect',
                     ip: that.ip
                 }));
-                this.getHomes(that)
+                this.getHomes()
             }
         }
-        this.ws.onclose = ()=>{
+        ws.onclose = ()=>{
             if(that.currentHome){
-                this.exitHome(that)
+                this.exitHome()
             }
             console.log('ws通道已关闭');
             if(that.internet){
@@ -48,45 +52,45 @@ class Internet{
         }
     }
     close(){
-        this.ws.close()
+        ws.close()
     }
-    getHomes(that){
-        this.ws.send(JSON.stringify({
+    getHomes(){
+        ws.send(JSON.stringify({
             status: 'getHomes',
             ip: that.ip
         }));
     }
-    createHome(that){
+    createHome(){
         that.$message({
             type: 'success',
             message: '创建成功',
             duration: 1000
         })
-        this.ws.send(JSON.stringify({
+        ws.send(JSON.stringify({
             status: 'addNewHome',
             homeName: that.newHomeName,
             ip: that.ip
         }));
         that.closeCreateHome()
     }
-    enterHome(item,that){
+    enterHome(item){
         that.currentHome = item
         that.openDraw()
-        this.ws.send(JSON.stringify({
+        ws.send(JSON.stringify({
             status: 'enterHome',
             homeName: that.currentHome,
             ip: that.ip
         }))
     }
-    exitHome(that){
-        this.ws.send(JSON.stringify({
+    exitHome(){
+        ws.send(JSON.stringify({
             status: 'exitHome',
             homeName: that.currentHome,
             ip: that.ip
         }))
     }
-    sendStart(x,y,that){
-        this.ws.send(JSON.stringify({
+    sendStart(x,y){
+        ws.send(JSON.stringify({
             status: 'sendStart',
             homeName: that.currentHome,
             ip: that.ip,
@@ -98,8 +102,8 @@ class Internet{
             }
         }))
     }
-    sendDrawing(x,y,that){
-        this.ws.send(JSON.stringify({
+    sendDrawing(x,y){
+        ws.send(JSON.stringify({
             status: 'sendDrawing',
             homeName: that.currentHome,
             ip: that.ip,
@@ -111,8 +115,8 @@ class Internet{
             }
         }));
     }
-    sendStop(that){
-        this.ws.send(JSON.stringify({
+    sendStop(){
+        ws.send(JSON.stringify({
             status: 'sendStop',
             homeName: that.currentHome,
             ip: that.ip,
