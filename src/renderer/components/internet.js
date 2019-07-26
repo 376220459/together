@@ -82,7 +82,7 @@ class Internet{
             ip: that.ip
         }))
     }
-    sendStart(e,x,y,that){
+    sendStart(x,y,that){
         this.ws.send(JSON.stringify({
             status: 'sendStart',
             homeName: that.currentHome,
@@ -95,7 +95,7 @@ class Internet{
             }
         }))
     }
-    sendDrawing(e,x,y,that){
+    sendDrawing(x,y,that){
         this.ws.send(JSON.stringify({
             status: 'sendDrawing',
             homeName: that.currentHome,

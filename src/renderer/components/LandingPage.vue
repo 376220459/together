@@ -142,14 +142,7 @@ export default {
       if(this.internet){
         internet.getHomes(this)
       }else{
-        ipc.send('notice-main', {
-          status: 'getHomes'
-        })
-        this.$message({
-          type: 'success',
-          message: '房间列表已刷新',
-          duration: 1000
-        })
+        localnet.getHomes(ipc,this)
       }
     },
     // getHomes(){
@@ -213,37 +206,40 @@ export default {
     //     }
     // },
     openLocalnet(){
-      if(!this.localnetOpened){
-        this.localnetOpened = true
-        ipc.send('notice-main', {
-          status: 'openLocalnet'
-        })
-      }
-      
-      this.getHomes()
-
-      ipc.on('notice-vice', (event, arg)=>{
-        if(arg.status == 'otherStart'){
-          this.otherStart(arg.e)
-        }else if(arg.status == 'otherDrawing'){
-          this.otherDrawing(arg.e)
-        }else if(arg.status == 'otherStop'){
-          this.otherStop(arg.e)
-        }else if(arg.status == 'createHome'){
-          this.homes = arg.homes
-          this.currentHome = this.homes[this.homes.length - 1].homeName
-          this.openDraw()
-        }else if(arg.status == 'updateHomes'){
-          this.homes = arg.homes
-          console.log('房间列表更新')
-          this.initPen()
-        }else if(arg.status == 'enterHome'){
-          this.homes = arg.homes
-          this.currentHome = this.homes[this.homes.length - 1].homeName
-          this.openDraw()
-        }
-      })
+      localnet.openLocalnet(ipc,this)
     },
+    // openLocalnet(){
+    //   if(!this.localnetOpened){
+    //     this.localnetOpened = true
+    //     ipc.send('notice-main', {
+    //       status: 'openLocalnet'
+    //     })
+    //   }
+      
+    //   this.getHomes()
+
+    //   ipc.on('notice-vice', (event, arg)=>{
+    //     if(arg.status == 'otherStart'){
+    //       this.otherStart(arg.e)
+    //     }else if(arg.status == 'otherDrawing'){
+    //       this.otherDrawing(arg.e)
+    //     }else if(arg.status == 'otherStop'){
+    //       this.otherStop(arg.e)
+    //     }else if(arg.status == 'createHome'){
+    //       this.homes = arg.homes
+    //       this.currentHome = this.homes[this.homes.length - 1].homeName
+    //       this.openDraw()
+    //     }else if(arg.status == 'updateHomes'){
+    //       this.homes = arg.homes
+    //       console.log('房间列表更新')
+    //       this.initPen()
+    //     }else if(arg.status == 'enterHome'){
+    //       this.homes = arg.homes
+    //       this.currentHome = this.homes[this.homes.length - 1].homeName
+    //       this.openDraw()
+    //     }
+    //   })
+    // },
     openCreateHome(){
       this.createHomeIf = true
     },
@@ -260,16 +256,7 @@ export default {
       if(this.internet){ 
         internet.createHome(this)
       }else{
-        this.$message({
-          type: 'success',
-          message: '创建成功',
-          duration: 1000
-        })
-        ipc.send('notice-main', {
-          status: 'createHome',
-          homeName: this.newHomeName
-        })
-        this.closeCreateHome()
+        localnet.createHome(ipc,this)
       }
     },
     // createHome(){
@@ -307,10 +294,7 @@ export default {
       if(this.internet){
         internet.enterHome(item,this)
       }else{
-        ipc.send('notice-main', {
-          status: 'enterHome',
-          homeName: item
-        })
+        localnet.enterHome(item,ipc)
       }
     },
     // enterHome(item){
@@ -333,11 +317,7 @@ export default {
       if(this.internet){
         internet.exitHome(this)
       }else{
-        ipc.send('notice-main', {
-          status: 'exitHome',
-          homeName: this.currentHome,
-          ip: this.ip
-        })
+        localnet.exitHome(ipc,this)
       }
       this.currentHome = ''
       this.exitDraw()
@@ -446,19 +426,9 @@ export default {
       let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
       let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
       if(this.internet){
-        internet.sendStart(e,x,y,this)
+        internet.sendStart(x,y,this)
       }else{
-        ipc.send('notice-main', {
-            status: 'sendStart',
-            homeName: this.currentHome,
-            ip: this.ip,
-            e: {
-              ip: this.ip,
-              clientX: x,
-              clientY: y,
-              color: this.color
-            }
-        })
+        localnet.sendStart(x,y,ipc,this)
       }
     },
     // sendStart(e){
@@ -494,19 +464,9 @@ export default {
       let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
       let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
       if(this.internet){
-        internet.sendDrawing(e,x,y,this)
+        internet.sendDrawing(x,y,this)
       }else{
-        ipc.send('notice-main', {
-            status: 'sendDrawing',
-            homeName: this.currentHome,
-            ip: this.ip,
-            e: {
-              ip: this.ip,
-              clientX: x,
-              clientY: y,
-              color: this.color
-            }
-        })
+        localnet.sendDrawing(x,y,ipc,this)
       }
     },
     // sendDrawing(e){
@@ -542,14 +502,7 @@ export default {
       if(this.internet){
         internet.sendStop(this)
       }else{
-        ipc.send('notice-main', {
-            status: 'sendStop',
-            homeName: this.currentHome,
-            ip: this.ip,
-            e: {
-              ip: this.ip
-            }
-        })
+        localnet.sendStop(ipc,this)
       }
     }
     // sendStop(){

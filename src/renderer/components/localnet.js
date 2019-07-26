@@ -1,102 +1,102 @@
 class Localnet{
-    openLocalnet(){
-        if(!this.localnetOpened){
-            this.localnetOpened = true
+    openLocalnet(ipc,that){
+        if(!that.localnetOpened){
+            that.localnetOpened = true
             ipc.send('notice-main', {
                 status: 'openLocalnet'
             })
         }
-        this.getHomes()
+        this.getHomes(ipc,that)
         ipc.on('notice-vice', (event, arg)=>{
             if(arg.status == 'otherStart'){
-                this.otherStart(arg.e)
+                that.otherStart(arg.e)
             }else if(arg.status == 'otherDrawing'){
-                this.otherDrawing(arg.e)
+                that.otherDrawing(arg.e)
             }else if(arg.status == 'otherStop'){
-                this.otherStop(arg.e)
+                that.otherStop(arg.e)
             }else if(arg.status == 'createHome'){
-                this.homes = arg.homes
-                this.currentHome = this.homes[this.homes.length - 1].homeName
-                this.openDraw()
+                that.homes = arg.homes
+                that.currentHome = that.homes[that.homes.length - 1].homeName
+                that.openDraw()
             }else if(arg.status == 'updateHomes'){
-                this.homes = arg.homes
+                that.homes = arg.homes
                 console.log('房间列表更新')
-                this.initPen()
+                that.initPen()
             }else if(arg.status == 'enterHome'){
-                this.homes = arg.homes
-                this.currentHome = this.homes[this.homes.length - 1].homeName
-                this.openDraw()
+                that.homes = arg.homes
+                that.currentHome = that.homes[that.homes.length - 1].homeName
+                that.openDraw()
             }
         })
     }
-    getHomes(){
+    getHomes(ipc,that){
         ipc.send('notice-main', {
             status: 'getHomes'
         })
-        this.$message({
+        that.$message({
             type: 'success',
             message: '房间列表已刷新',
             duration: 1000
         })
     }
-    createHome(){
-        this.$message({
+    createHome(ipc,that){
+        that.$message({
             type: 'success',
             message: '创建成功',
             duration: 1000
         })
         ipc.send('notice-main', {
             status: 'createHome',
-            homeName: this.newHomeName
+            homeName: that.newHomeName
         })
-        this.closeCreateHome()
+        that.closeCreateHome()
     }
-    enterHome(item,index){
+    enterHome(item,ipc){
         ipc.send('notice-main', {
             status: 'enterHome',
             homeName: item
         })
     }
-    exitHome(){
+    exitHome(ipc,that){
         ipc.send('notice-main', {
             status: 'exitHome',
-            homeName: this.currentHome,
-            ip: this.ip
+            homeName: that.currentHome,
+            ip: that.ip
         })
     }
-    sendStart(e){
+    sendStart(x,y,ipc,that){
         ipc.send('notice-main', {
             status: 'sendStart',
-            homeName: this.currentHome,
-            ip: this.ip,
+            homeName: that.currentHome,
+            ip: that.ip,
             e: {
-                ip: this.ip,
+                ip: that.ip,
                 clientX: x,
                 clientY: y,
-                color: this.color
+                color: that.color
             }
         })
     }
-    sendDrawing(e){
+    sendDrawing(x,y,ipc,that){
         ipc.send('notice-main', {
             status: 'sendDrawing',
-            homeName: this.currentHome,
-            ip: this.ip,
+            homeName: that.currentHome,
+            ip: that.ip,
             e: {
-                ip: this.ip,
+                ip: that.ip,
                 clientX: x,
                 clientY: y,
-                color: this.color
+                color: that.color
             }
         })
     }
-    sendStop(){
+    sendStop(ipc,that){
         ipc.send('notice-main', {
             status: 'sendStop',
-            homeName: this.currentHome,
-            ip: this.ip,
+            homeName: that.currentHome,
+            ip: that.ip,
             e: {
-                ip: this.ip
+                ip: that.ip
             }
         })
     }
