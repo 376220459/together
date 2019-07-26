@@ -234,6 +234,7 @@ ipc.on('notice-main',(event, arg)=>{
       return
     }
     homes[homeIndex].members.push(IPAddress)
+    homes[homeIndex].members = [...new Set(homes[homeIndex].members)]
     me.send('notice-vice', {
       status: 'enterHome',
       homes: homes
