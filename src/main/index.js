@@ -53,7 +53,8 @@ for(var devName in interfaces){
 const ipc = require('electron').ipcMain
 let me;//me代表自己（ipc）
 let dgram,server,multicastAddr
-let homes = [{homeName:'buxi',members:['192.168.1.198','192.168.1.183']}]
+// let homes = [{homeName:'buxi',members:['192.168.1.198','192.168.1.183']}]
+let homes = []
 function openLocalnet(){
   dgram = require('dgram'),
   server = dgram.createSocket("udp4"),

@@ -1,6 +1,7 @@
 class Internet{
     openInternet(that){
-        this.ws = new WebSocket(`ws://192.168.1.183:8888?ip=${that.ip}`)
+        this.ws = new WebSocket(`ws://172.20.10.3:8888?ip=${that.ip}`)
+        // this.ws = new WebSocket(`ws://192.168.1.183:8888?ip=${that.ip}`)
         // this.ws = new WebSocket(`ws://192.168.1.196:8888?ip=${that.ip}`)
         // this.ws = new WebSocket(`ws://192.168.16.102:8888?ip=${that.ip}`)
         this.ws.onmessage = e=>{
