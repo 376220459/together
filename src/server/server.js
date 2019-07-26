@@ -35,6 +35,9 @@ let server = ws.createServer(conn=>{
             users[obj.ip] = conn
         }else if(obj.status == 'enterHome'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
+            if(homeIndex === -1){
+                return
+            }
             if(homes[homeIndex].members.indexOf(obj.ip) === -1){
                 homes[homeIndex].members.push(obj.ip)
                 server.connections.forEach(conn=>{
@@ -46,6 +49,9 @@ let server = ws.createServer(conn=>{
             }
         }else if(obj.status == 'exitHome'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
+            if(homeIndex === -1){
+                return
+            }
             let memberIndex = homes[homeIndex].members.indexOf(obj.ip)
             if(memberIndex !== -1){
                 homes[homeIndex].members.splice(memberIndex,1)
@@ -61,6 +67,9 @@ let server = ws.createServer(conn=>{
             }
         }else if(obj.status == 'sendStart'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
+            if(homeIndex === -1){
+                return
+            }
             homes[homeIndex].members.forEach(e=>{
                 if(e !== obj.ip){
                     users[e].sendText(JSON.stringify({
@@ -71,6 +80,9 @@ let server = ws.createServer(conn=>{
             })
         }else if(obj.status == 'sendDrawing'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
+            if(homeIndex === -1){
+                return
+            }
             homes[homeIndex].members.forEach(e=>{
                 if(e !== obj.ip){
                     users[e].sendText(JSON.stringify({
@@ -81,6 +93,9 @@ let server = ws.createServer(conn=>{
             })
         }else if(obj.status == 'sendStop'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
+            if(homeIndex === -1){
+                return
+            }
             homes[homeIndex].members.forEach(e=>{
                 if(e !== obj.ip){
                     users[e].sendText(JSON.stringify({
