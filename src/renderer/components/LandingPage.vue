@@ -74,6 +74,7 @@ let localnet = new Localnet(),
     internet = new Internet()
 
 // const ipc = require('electron').ipcRenderer
+//what happened?
 
 function debounce(func,wait){
   let id = null;
