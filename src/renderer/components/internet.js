@@ -1,11 +1,4 @@
 class Internet{
-    constructor(){
-        // this.newHomeName
-        // this.currentHome
-        // this.color
-        // this.homes
-        // this.ip
-    }
     openInternet(that){
         this.ws = new WebSocket(`ws://192.168.1.183:8888?ip=${that.ip}`)
         // this.ws = new WebSocket(`ws://192.168.1.196:8888?ip=${that.ip}`)
@@ -46,6 +39,9 @@ class Internet{
         this.ws.onclose = ()=>{
             console.log('ws通道已关闭');
         }
+    }
+    close(){
+        this.ws.close()
     }
     getHomes(that){
         this.ws.send(JSON.stringify({

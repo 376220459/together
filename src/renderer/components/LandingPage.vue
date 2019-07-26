@@ -128,7 +128,7 @@ export default {
         this.internet = false
         this.localnet = true
 
-        this.ws.close()
+        internet.close()
         this.openLocalnet()
       }else{
         this.localnet = false
