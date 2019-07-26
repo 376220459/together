@@ -52,9 +52,8 @@ for(var devName in interfaces){
 
 const ipc = require('electron').ipcMain
 let me;//me代表自己（ipc）
-let connections = [];//存放连接用户
 let dgram,server,multicastAddr
-let homes = []
+let homes = [{homeName:'buxi',members:['192.168.1.198','192.168.1.183']}]
 function openLocalnet(){
   dgram = require('dgram'),
   server = dgram.createSocket("udp4"),
@@ -143,6 +142,7 @@ function openLocalnet(){
           })
         }
       }else if(msg.status == 'updateHomes'){
+        console.log("hahaha")
         if(JSON.stringify(homes) != JSON.stringify(msg.homes)){
           homes = msg.homes
           me.send('notice-vice', {
