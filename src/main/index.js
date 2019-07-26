@@ -53,7 +53,6 @@ for(var devName in interfaces){
 const ipc = require('electron').ipcMain
 let me;//me代表自己（ipc）
 let dgram,server,multicastAddr
-// let homes = [{homeName:'buxi',members:['192.168.1.198','192.168.1.183']}]
 let homes = []
 function openLocalnet(){
   dgram = require('dgram'),
@@ -125,6 +124,9 @@ function openLocalnet(){
       }else if(msg.status == 'enterHome'){
         if(rinfo.address === IPAddress){
           let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
+          if(homeIndex === -1){
+            return
+          }
           homes[homeIndex].members.push(msg.ip)
           currentHome = homes[homeIndex]
           me.send('notice-vice', {
@@ -135,6 +137,9 @@ function openLocalnet(){
           })
         }else{
           let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
+          if(homeIndex === -1){
+            return
+          }
           homes[homeIndex].members.push(msg.ip)
           me.send('notice-vice', {
             status: 'updateHomes',
@@ -160,7 +165,11 @@ function openLocalnet(){
 
 ipc.on('notice-main',(event, arg)=>{
   if(arg.status == 'sendStart'){
-    homes[homes.map(e=>e.homeName).indexOf(arg.homeName)].members.forEach(e=>{
+    let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
+    if(homeIndex === -1){
+      return
+    }
+    homes[homeIndex].members.forEach(e=>{
       if(e !== IPAddress){
         server.send(JSON.stringify({
           status: 'otherStart',
@@ -169,7 +178,11 @@ ipc.on('notice-main',(event, arg)=>{
       }
     })
   }else if(arg.status == 'sendDrawing'){
-    homes[homes.map(e=>e.homeName).indexOf(arg.homeName)].members.forEach(e=>{
+    let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
+    if(homeIndex === -1){
+      return
+    }
+    homes[homeIndex].members.forEach(e=>{
       if(e !== IPAddress){
         server.send(JSON.stringify({
           status: 'otherDrawing',
@@ -178,7 +191,11 @@ ipc.on('notice-main',(event, arg)=>{
       }
     })
   }else if(arg.status == 'sendStop'){
-    homes[homes.map(e=>e.homeName).indexOf(arg.homeName)].members.forEach(e=>{
+    let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
+    if(homeIndex === -1){
+      return
+    }
+    homes[homeIndex].members.forEach(e=>{
       if(e !== IPAddress){
         server.send(JSON.stringify({
           status: 'otherStop',
@@ -212,8 +229,11 @@ ipc.on('notice-main',(event, arg)=>{
       homes: homes
     }),'8066',multicastAddr)
   }else if(arg.status == 'enterHome'){
-    homes[homes.map(e=>e.homeName).indexOf(arg.homeName)].members.push(IPAddress)
-    
+    let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
+    if(homeIndex === -1){
+      return
+    }
+    homes[homeIndex].members.push(IPAddress)
     me.send('notice-vice', {
       status: 'enterHome',
       homes: homes
@@ -224,7 +244,13 @@ ipc.on('notice-main',(event, arg)=>{
     }),'8066',multicastAddr)
   }else if(arg.status == 'exitHome'){
     let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
+    if(homeIndex === -1){
+      return
+    }
     let memberIndex = homes[homeIndex].members.indexOf(arg.ip)
+    if(memberIndex === -1){
+      return
+    }
     homes[homeIndex].members.splice(memberIndex,1)
     if(homes[homeIndex].members.length === 0){
       homes.splice(homeIndex,1)
