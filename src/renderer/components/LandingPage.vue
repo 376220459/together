@@ -142,7 +142,7 @@ export default {
       if(this.internet){
         internet.getHomes(this)
       }else{
-        localnet.getHomes(ipc,this)
+        localnet.getHomes(this)
       }
     },
     // getHomes(){
@@ -206,7 +206,7 @@ export default {
     //     }
     // },
     openLocalnet(){
-      localnet.openLocalnet(ipc,this)
+      localnet.openLocalnet(this)
     },
     // openLocalnet(){
     //   if(!this.localnetOpened){
@@ -256,7 +256,7 @@ export default {
       if(this.internet){ 
         internet.createHome(this)
       }else{
-        localnet.createHome(ipc,this)
+        localnet.createHome(this)
       }
     },
     // createHome(){
@@ -294,7 +294,7 @@ export default {
       if(this.internet){
         internet.enterHome(item,this)
       }else{
-        localnet.enterHome(item,ipc)
+        localnet.enterHome(item)
       }
     },
     // enterHome(item){
@@ -317,7 +317,7 @@ export default {
       if(this.internet){
         internet.exitHome(this)
       }else{
-        localnet.exitHome(ipc,this)
+        localnet.exitHome(this)
       }
       this.currentHome = ''
       this.exitDraw()
@@ -428,7 +428,7 @@ export default {
       if(this.internet){
         internet.sendStart(x,y,this)
       }else{
-        localnet.sendStart(x,y,ipc,this)
+        localnet.sendStart(x,y,this)
       }
     },
     // sendStart(e){
@@ -466,7 +466,7 @@ export default {
       if(this.internet){
         internet.sendDrawing(x,y,this)
       }else{
-        localnet.sendDrawing(x,y,ipc,this)
+        localnet.sendDrawing(x,y,this)
       }
     },
     // sendDrawing(e){
@@ -502,7 +502,7 @@ export default {
       if(this.internet){
         internet.sendStop(this)
       }else{
-        localnet.sendStop(ipc,this)
+        localnet.sendStop(this)
       }
     }
     // sendStop(){
