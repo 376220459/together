@@ -33,10 +33,10 @@ class Transfer{
     selectNet(net){
         if(net === 'internet'){
             that.internet = true
-            that.openInternet()
+            this.openInternet()
         }else{
             that.localnet = true
-            that.openLocalnet()
+            this.openLocalnet()
         }
     }
     changeNet(){
@@ -45,12 +45,12 @@ class Transfer{
             that.localnet = true
 
             internet.close()
-            that.openLocalnet()
+            this.openLocalnet()
         }else{
             that.localnet = false
             that.internet = true
             that.ipc.removeAllListeners('notice-vice')
-            that.openInternet()
+            this.openInternet()
         }
         that.homes = []
     }
@@ -91,17 +91,31 @@ class Transfer{
     }
     changeColor(color,index){
         that.color = color
-        that.colorStyle = []
-        that.colorStyle[index] = `background:white;border:7px solid ${color};`
+        if(that.rubber){
+            that.rubber = false
+            that.lineWidth = 1
+            that.ctx.lineWidth = 1
+        }
+        that.toolStyle = []
+        that.toolStyle[index] = `background:white;border:7px solid ${color};`
+    }
+    selectRubber(){
+        that.color = 'white'
+        that.lineWidth = 15
+        that.ctx.lineWidth = 15
+        if(!that.rubber){
+            that.rubber = true
+            that.toolStyle = []
+            that.toolStyle[5] = `border: 1.5px dotted skyblue;`
+        }
     }
     exitDraw(){
         that.drawShow = 'none'
         that.color = 'black'
-        that.colorStyle = [,,,,'background:white;border:7px solid black;']
+        that.toolStyle = [,,,,'background:white;border:7px solid black;']
     }
     initPen(){
         let canvas = document.getElementById('canvas')
-        let canvasDiv = document.getElementById('canvasDiv')
         let currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
         if(that.currentHome){
             if(currentHomeIndex === -1){
@@ -110,7 +124,7 @@ class Transfer{
             that.homes[currentHomeIndex].members.forEach(e=>{
             that.pens[e] = {}
             that.pens[e].ctx = canvas.getContext("2d")
-            that.pens[e].ctx.lineWidth = 3
+            that.pens[e].ctx.lineWidth = 1
             that.pens[e].path = new Path2D()
             that.pens[e].tag = false
             })
@@ -126,7 +140,7 @@ class Transfer{
             canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
             }, 0);
             that.ctx = canvas.getContext("2d")
-            that.ctx.lineWidth = 3
+            that.ctx.lineWidth = 1
             that.initPen()
         }
     }
@@ -139,6 +153,7 @@ class Transfer{
         that.tag = true
     }
     otherStart(e){
+        that.pens[e.ip].ctx.lineWidth = e.lineWidth
         that.pens[e.ip].path = new Path2D()
         that.pens[e.ip].path.moveTo(e.clientX,e.clientY)
         that.pens[e.ip].tag = true
@@ -190,6 +205,13 @@ class Transfer{
         }else{
             localnet.sendStop()
         }
+    }
+    openCreateHome(){
+        that.createHomeIf = true
+    }
+    closeCreateHome(){
+        that.createHomeIf = false
+        that.newHomeName = ''
     }
 }
 

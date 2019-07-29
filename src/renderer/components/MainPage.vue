@@ -55,11 +55,12 @@
           您的浏览器暂不支持canvas...
         </canvas>
         <div v-if="this.drawShow == 'block' ? true : false" class="canvas-tools">
-          <div @click="changeColor('#F56C6C',0)" class="red" :style=colorStyle[0]></div>
-          <div @click="changeColor('#67C23A',1)" class="green" :style=colorStyle[1]></div>
-          <div @click="changeColor('#909399',2)" class="gray" :style=colorStyle[2]></div>
-          <div @click="changeColor('#E6A23C',3)" class="orange" :style=colorStyle[3]></div>
-          <div @click="changeColor('black',4)" class="black" :style=colorStyle[4]></div>
+          <div @click="changeColor('#F56C6C',0)" class="red pen" :style=toolStyle[0]></div>
+          <div @click="changeColor('#67C23A',1)" class="green pen" :style=toolStyle[1]></div>
+          <div @click="changeColor('#909399',2)" class="gray pen" :style=toolStyle[2]></div>
+          <div @click="changeColor('#E6A23C',3)" class="orange pen" :style=toolStyle[3]></div>
+          <div @click="changeColor('black',4)" class="black pen" :style=toolStyle[4]></div>
+          <div @click="selectRubber(5)" class="rubber" :style=toolStyle[5]><i class="iconfont icon-xiangpi"></i></div>
         </div>
       </div>
     </main>
@@ -99,6 +100,7 @@ window.addEventListener('resize',debounce(function(){
 export default {
   data() {
     return {
+      rubber: false,
       pens:{},
       localnetOpened: false,
       ipc: null,
@@ -111,8 +113,9 @@ export default {
       newHomeName: '',
       drawShow: 'none',
       createHomeIf: false,
+      lineWidth: 1,
       color: 'black',
-      colorStyle: [,,,,'background:white;border:7px solid black;'],
+      toolStyle: [,,,,'background:white;border:7px solid black;'],
       otherColor: 'black',
       connections: [],
       ctx: null,
@@ -123,24 +126,14 @@ export default {
     }
   },
   methods: {
-    changeNet(){
-      transfer.changeNet()
+    selectNet(net){
+      transfer.selectNet(net)
     },
     getHomes(){
       transfer.getHomes()
     },
-    openInternet(){
-      transfer.openInternet()
-    },
-    openLocalnet(){
-      transfer.openLocalnet()
-    },
-    openCreateHome(){
-      this.createHomeIf = true
-    },
-    closeCreateHome(){
-      this.createHomeIf = false
-      this.newHomeName = ''
+    changeNet(){
+      transfer.changeNet()
     },
     createHome(){
       transfer.createHome()
@@ -151,20 +144,17 @@ export default {
     exitHome(){
       transfer.exitHome()
     },
-    selectNet(net){
-      transfer.selectNet(net)
-    },
-    changeColor(color,index){
-      transfer.changeColor(color,index)
-    },
-    exitDraw(){
-      transfer.exitDraw()
+    openDraw(){
+      transfer.openDraw()
     },
     initPen(){
       transfer.initPen()
     },
-    openDraw(){
-      transfer.openDraw()
+    changeColor(color,index){
+      transfer.changeColor(color,index)
+    },
+    selectRubber(){
+      transfer.selectRubber()
     },
     start(e){
       transfer.start(e)
@@ -192,6 +182,15 @@ export default {
     },
     sendStop(){
       transfer.sendStop()
+    },
+    exitDraw(){
+      transfer.exitDraw()
+    },
+    openCreateHome(){
+      transfer.openCreateHome()
+    },
+    closeCreateHome(){
+      transfer.closeCreateHome()
     }
   },
   mounted() {
@@ -327,7 +326,7 @@ export default {
           display: flex;
           justify-content: center;
           align-items: center;
-          div{
+          .pen{
             box-sizing: border-box;
             margin: 0 10px;
             width: 30px;
@@ -349,6 +348,16 @@ export default {
           }
           .black{
             background: black;
+          }
+          .rubber{
+            box-sizing: border-box;
+            width: 40px;
+            height: 35px;
+            text-align: center;
+            cursor: pointer;
+            i{
+              font-size: 30px;
+            }
           }
         }
         canvas{

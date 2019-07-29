@@ -77,7 +77,8 @@ class Localnet{
                 ip: that.ip,
                 clientX: x,
                 clientY: y,
-                color: that.color
+                color: that.color,
+                width: that.width
             }
         })
     }
