@@ -93,7 +93,6 @@ class Transfer{
         that.color = color
         if(that.rubber){
             that.rubber = false
-            that.lineWidth = 1
             that.ctx.lineWidth = 1
         }
         that.toolStyle = []
@@ -101,7 +100,6 @@ class Transfer{
     }
     selectRubber(){
         that.color = 'white'
-        that.lineWidth = 15
         that.ctx.lineWidth = 15
         if(!that.rubber){
             that.rubber = true
@@ -153,7 +151,6 @@ class Transfer{
         that.tag = true
     }
     otherStart(e){
-        that.pens[e.ip].ctx.lineWidth = e.lineWidth
         that.pens[e.ip].path = new Path2D()
         that.pens[e.ip].path.moveTo(e.clientX,e.clientY)
         that.pens[e.ip].tag = true
@@ -170,6 +167,9 @@ class Transfer{
     }
     otherDrawing(e){
         if(that.pens[e.ip].tag){
+            if(e.color === 'white'){
+                that.pens[e.ip].ctx.lineWidth = 15
+            }
             that.pens[e.ip].ctx.strokeStyle = e.color
             that.pens[e.ip].path.lineTo(e.clientX,e.clientY)
             that.pens[e.ip].ctx.stroke(that.pens[e.ip].path)

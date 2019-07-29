@@ -98,8 +98,7 @@ class Internet{
                 ip: that.ip,
                 clientX: x,
                 clientY: y,
-                color: that.color,
-                width: that.width
+                color: that.color
             }
         }))
     }

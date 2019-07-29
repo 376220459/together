@@ -113,7 +113,6 @@ export default {
       newHomeName: '',
       drawShow: 'none',
       createHomeIf: false,
-      lineWidth: 1,
       color: 'black',
       toolStyle: [,,,,'background:white;border:7px solid black;'],
       otherColor: 'black',
