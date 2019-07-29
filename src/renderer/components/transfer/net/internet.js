@@ -115,14 +115,15 @@ class Internet{
             }
         }));
     }
-    sendStop(){
+    sendStop(currentDraw){
         ws.send(JSON.stringify({
             status: 'sendStop',
             homeName: that.currentHome,
             ip: that.ip,
             e: {
                 ip: that.ip
-            }
+            },
+            currentDraw: currentDraw
         }));
     }
 }

@@ -11,7 +11,8 @@ let server = ws.createServer(conn=>{
             if(homes.map(e=>e.homeName).indexOf(obj.homeName) === -1){
                 homes.push({
                     homeName: obj.homeName,
-                    members: [obj.ip]
+                    members: [obj.ip],
+                    currentDraw: null
                 })
                 conn.sendText(JSON.stringify({
                     status: 'addNewHome',
@@ -97,6 +98,7 @@ let server = ws.createServer(conn=>{
             if(homeIndex === -1){
                 return
             }
+            homes[homeIndex].currentDraw = obj.currentDraw
             homes[homeIndex].members.forEach(e=>{
                 if(e !== obj.ip){
                     users[e].sendText(JSON.stringify({

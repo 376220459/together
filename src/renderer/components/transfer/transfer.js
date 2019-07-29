@@ -2,9 +2,12 @@ import {Localnet} from './net/localnet'
 import {Internet} from './net/internet'
 let localnet = new Localnet(),
     internet = new Internet()
-let that
+let that,canvas,canvasDiv
+
 class Transfer{
     init(context){
+        canvas = document.getElementById('canvas')
+        canvasDiv = document.getElementById('canvasDiv')
         that = context
         that.ipc = require('electron').ipcRenderer
         that.ipc.send('notice-main', {
@@ -113,7 +116,6 @@ class Transfer{
         that.toolStyle = [,,,,'background:white;border:7px solid black;']
     }
     initPen(){
-        let canvas = document.getElementById('canvas')
         let currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
         if(that.currentHome){
             if(currentHomeIndex === -1){
@@ -131,19 +133,20 @@ class Transfer{
     openDraw(){
         if(that.drawShow == 'none'){
             that.drawShow = 'block'
-            let canvas = document.getElementById('canvas')
-            let canvasDiv = document.getElementById('canvasDiv')
+            let currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
             setTimeout(() => {
             canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
             canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
             }, 0);
             that.ctx = canvas.getContext("2d")
+            if(that.homes[currentHomeIndex].currentDraw){
+                that.ctx.putImageData(currentDraw,0,0)
+            }
             that.ctx.lineWidth = 1
             that.initPen()
         }
     }
     start(e){
-        let canvasDiv = document.getElementById('canvasDiv')
         that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
         that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
         that.path = new Path2D()
@@ -156,7 +159,6 @@ class Transfer{
         that.pens[e.ip].tag = true
     }
     drawing(e){
-        let canvasDiv = document.getElementById('canvasDiv')
         if(that.tag){
             that.ctx.strokeStyle = that.color
             that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
@@ -200,10 +202,11 @@ class Transfer{
         }
     }
     sendStop(){
+        let currentDraw = that.ctx.getImageData(0,0,canvas.width,canvas.height)
         if(that.internet){
-            internet.sendStop()
+            internet.sendStop(currentDraw)
         }else{
-            localnet.sendStop()
+            localnet.sendStop(currentDraw)
         }
     }
     openCreateHome(){
