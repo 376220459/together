@@ -1,5 +1,5 @@
-import {Localnet} from './localnet'
-import {Internet} from './internet'
+import {Localnet} from './net/localnet'
+import {Internet} from './net/internet'
 let localnet = new Localnet(),
     internet = new Internet()
 let that
