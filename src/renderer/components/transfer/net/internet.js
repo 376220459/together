@@ -115,7 +115,7 @@ class Internet{
             }
         }));
     }
-    sendStop(currentDraw){
+    sendStop(){
         ws.send(JSON.stringify({
             status: 'sendStop',
             homeName: that.currentHome,
@@ -123,7 +123,7 @@ class Internet{
             e: {
                 ip: that.ip
             },
-            // currentDraw: currentDraw
+            currentLine: that.currentLine
         }));
     }
 }

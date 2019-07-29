@@ -100,6 +100,7 @@ window.addEventListener('resize',debounce(function(){
 export default {
   data() {
     return {
+      currentLine: null,
       rubber: false,
       pens:{},
       localnetOpened: false,

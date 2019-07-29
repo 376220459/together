@@ -133,17 +133,37 @@ class Transfer{
     openDraw(){
         if(that.drawShow == 'none'){
             that.drawShow = 'block'
-            let currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
             setTimeout(() => {
             canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
             canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
             }, 0);
-            that.ctx = canvas.getContext("2d")
-            if(that.homes[currentHomeIndex].currentDraw){
-                that.ctx.putImageData(currentDraw,0,0)
-            }
+            that.ctx = canvas.getContext("2d") 
             that.ctx.lineWidth = 1
             that.initPen()
+
+            
+            let currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
+            if(that.homes[currentHomeIndex].currentDraw){
+                let ctx = canvas.getContext("2d")
+                that.homes[currentHomeIndex].currentDraw.forEach(e=>{
+                    let path = new Path2D()
+                    ctx.strokeStyle = e.color
+                    if(e.color === 'white'){
+                        ctx.lineWidth = 15
+                    }else{
+                        ctx.lineWidth = 1
+                    }
+                    e.points.forEach((item,index)=>{
+                        if(index == 0){
+                            path.moveTo(item[0],item[1])
+                        }else{
+                            path.lineTo(item[0],item[1])
+                            ctx.stroke(path)
+                        }
+                    })
+                })
+            }
+            
         }
     }
     start(e){
@@ -152,6 +172,11 @@ class Transfer{
         that.path = new Path2D()
         that.path.moveTo(that.x,that.y)
         that.tag = true
+
+        that.currentLine = {}
+        that.currentLine.points = []
+        that.currentLine.color = that.color
+        that.currentLine.points.push([that.x,that.y])
     }
     otherStart(e){
         that.pens[e.ip].path = new Path2D()
@@ -165,6 +190,9 @@ class Transfer{
             that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
             that.path.lineTo(that.x,that.y)
             that.ctx.stroke(that.path)
+
+            
+            that.currentLine.points.push([that.x,that.y])
         }
     }
     otherDrawing(e){
@@ -202,13 +230,10 @@ class Transfer{
         }
     }
     sendStop(){
-        let ctx = canvas.getContext("2d")
-        let currentDraw = ctx.getImageData(0,0,canvas.width,canvas.height)
-        console.log(currentDraw)
         if(that.internet){
-            internet.sendStop(currentDraw)
+            internet.sendStop()
         }else{
-            localnet.sendStop(currentDraw)
+            localnet.sendStop()
         }
     }
     openCreateHome(){
