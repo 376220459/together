@@ -202,7 +202,9 @@ class Transfer{
         }
     }
     sendStop(){
-        let currentDraw = that.ctx.getImageData(0,0,canvas.width,canvas.height)
+        let ctx = canvas.getContext("2d")
+        let currentDraw = ctx.getImageData(0,0,canvas.width,canvas.height)
+        console.log(currentDraw)
         if(that.internet){
             internet.sendStop(currentDraw)
         }else{
