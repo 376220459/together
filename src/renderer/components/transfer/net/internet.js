@@ -12,7 +12,7 @@ class Internet{
             let obj = JSON.parse(e.data)
             if(obj.status == 'addNewHome'){
                 that.homes = obj.homes
-                this.enterHome(that.homes[that.homes.length - 1].homeName,that)
+                this.enterHome(that.homes[that.homes.length - 1].homeName)
             }else if(obj.status == 'getHomes'){
                 that.homes = obj.homes
                 that.$message({
@@ -116,15 +116,18 @@ class Internet{
         }));
     }
     sendStop(){
-        ws.send(JSON.stringify({
-            status: 'sendStop',
-            homeName: that.currentHome,
-            ip: that.ip,
-            e: {
-                ip: that.ip
-            },
-            currentLine: that.currentLine
-        }));
+        if(that.currentLine && that.currentLine.points.length > 1){
+            ws.send(JSON.stringify({
+                status: 'sendStop',
+                homeName: that.currentHome,
+                ip: that.ip,
+                e: {
+                    ip: that.ip
+                },
+                currentLine: that.currentLine
+            }));
+            that.currentLine = null
+        }
     }
 }
 
