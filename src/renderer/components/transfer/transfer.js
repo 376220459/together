@@ -24,6 +24,12 @@ class Transfer{
         localnet.init(that)
         internet.init(that)
     }
+    openInternet(){
+        internet.openInternet(that)
+    }
+    openLocalnet(){
+        localnet.openLocalnet(that)
+    }
     selectNet(net){
         if(net === 'internet'){
             that.internet = true

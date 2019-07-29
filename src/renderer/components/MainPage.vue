@@ -130,10 +130,10 @@ export default {
       transfer.getHomes()
     },
     openInternet(){
-      internet.openInternet(this)
+      transfer.openInternet()
     },
     openLocalnet(){
-      localnet.openLocalnet(this)
+      transfer.openLocalnet()
     },
     openCreateHome(){
       this.createHomeIf = true
