@@ -119,14 +119,14 @@ class Transfer{
         let currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
         if(that.currentHome){
             if(currentHomeIndex === -1){
-            return
+                return
             }
             that.homes[currentHomeIndex].members.forEach(e=>{
-            that.pens[e] = {}
-            that.pens[e].ctx = canvas.getContext("2d")
-            that.pens[e].ctx.lineWidth = 1
-            that.pens[e].path = new Path2D()
-            that.pens[e].tag = false
+                that.pens[e] = {}
+                that.pens[e].ctx = canvas.getContext("2d")
+                that.pens[e].ctx.lineWidth = 1
+                that.pens[e].path = new Path2D()
+                that.pens[e].tag = false
             })
         }
     }
@@ -143,34 +143,36 @@ class Transfer{
 
             let currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
             if(that.homes[currentHomeIndex].currentDraw){
-                setTimeout(() => {
-                    that.homes[currentHomeIndex].currentDraw.forEach(e=>{
-                        let ctx = canvas.getContext("2d")
-                        let path = new Path2D()
-                        ctx.strokeStyle = e.color
-                        if(e.color === 'white'){
-                            ctx.lineWidth = 15
+                that.homes[currentHomeIndex].currentDraw.forEach(e=>{
+                    let ctx = canvas.getContext("2d")
+                    let path = new Path2D()
+                    ctx.strokeStyle = e.color
+                    if(e.color === 'white'){
+                        ctx.lineWidth = 15
+                    }else{
+                        ctx.lineWidth = 1
+                    }
+                    e.points.forEach((item,index)=>{
+                        if(index == 0){
+                            path.moveTo(item[0],item[1])
                         }else{
-                            ctx.lineWidth = 1
+                            
+                            path.lineTo(item[0],item[1])
+                            ctx.stroke(path)
                         }
-                        e.points.forEach((item,index)=>{
-                            if(index == 0){
-                                path.moveTo(item[0],item[1])
-                            }else{
-                                
-                                path.lineTo(item[0],item[1])
-                                ctx.stroke(path)
-                            }
-                        })
                     })
-                }, 0);
+                })
             }
-            
         }
     }
     start(e){
         that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
         that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
+        if(that.color === 'white'){
+            that.ctx.lineWidth = 15
+        }else{
+            that.ctx.lineWidth = 1
+        }
         that.path = new Path2D()
         that.path.moveTo(that.x,that.y)
         that.tag = true
@@ -181,6 +183,11 @@ class Transfer{
         that.currentLine.points.push([that.x,that.y])
     }
     otherStart(e){
+        if(that.color === 'white'){
+            that.ctx.lineWidth = 15
+        }else{
+            that.ctx.lineWidth = 1
+        }
         that.pens[e.ip].path = new Path2D()
         that.pens[e.ip].path.moveTo(e.clientX,e.clientY)
         that.pens[e.ip].tag = true
@@ -200,6 +207,8 @@ class Transfer{
         if(that.pens[e.ip].tag){
             if(e.color === 'white'){
                 that.pens[e.ip].ctx.lineWidth = 15
+            }else{
+                that.pens[e.ip].ctx.lineWidth = 1
             }
             that.pens[e.ip].ctx.strokeStyle = e.color
             that.pens[e.ip].path.lineTo(e.clientX,e.clientY)
