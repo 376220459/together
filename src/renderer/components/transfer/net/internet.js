@@ -6,8 +6,8 @@ class Internet{
     openInternet(){
         // ws = new WebSocket(`ws://172.20.10.3:8888?ip=${that.ip}`)
         // ws = new WebSocket(`ws://192.168.1.183:8888?ip=${that.ip}`)
-        // ws = new WebSocket(`ws://192.168.1.196:8888?ip=${that.ip}`)
-        ws = new WebSocket('ws://huaban.com')
+        ws = new WebSocket(`ws://192.168.1.196:8888`)
+        // ws = new WebSocket('ws://huaban.com')
         // ws = new WebSocket('ws://192.168.1.196:8888')
         // ws = new WebSocket(`ws://172.20.10.3:8888?ip=${that.ip}`)
         ws.onmessage = e=>{
