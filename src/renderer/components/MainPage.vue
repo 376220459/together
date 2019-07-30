@@ -60,7 +60,8 @@
           <div @click="changeColor('#909399',2)" class="gray pen" :style=toolStyle[2]></div>
           <div @click="changeColor('#E6A23C',3)" class="orange pen" :style=toolStyle[3]></div>
           <div @click="changeColor('black',4)" class="black pen" :style=toolStyle[4]></div>
-          <div @click="selectRubber(5)" class="rubber" :style=toolStyle[5]><i class="iconfont icon-xiangpi"></i></div>
+          <div @click="selectRubber" class="rubber" :style=toolStyle[5]><i class="iconfont icon-xiangpi"></i></div>
+          <div @click="selectMark" class="mark" :style=toolStyle[6]><i class="iconfont icon-masaike"></i></div>
         </div>
       </div>
     </main>
@@ -83,6 +84,7 @@ export default {
       loading: false,
       currentLine: null,
       rubber: false,
+      mark: false,
       pens:{},
       localnetOpened: false,
       ipc: null,
@@ -96,7 +98,7 @@ export default {
       drawShow: 'none',
       createHomeIf: false,
       color: 'black',
-      toolStyle: [,,,,'box-shadow:pink 0px 0px 30px 10px'],
+      toolStyle: [,,,,'box-shadow:aqua 0px 0px 30px 10px'],
       otherColor: 'black',
       connections: [],
       ctx: null,
@@ -136,6 +138,9 @@ export default {
     },
     selectRubber(){
       transfer.selectRubber()
+    },
+    selectMark(){
+      transfer.selectMark()
     },
     start(e){
       transfer.start(e)
@@ -331,14 +336,22 @@ export default {
           .black{
             background: black;
           }
-          .rubber{
+          .rubber,.mark{
             box-sizing: border-box;
             width: 40px;
             height: 35px;
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
             i{
               font-size: 30px;
+            }
+          }
+          .mark{
+            color: #B8B8B8;
+            i{
+              font-size: 27px;
             }
           }
         }

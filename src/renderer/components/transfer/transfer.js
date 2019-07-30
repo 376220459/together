@@ -111,16 +111,22 @@ class Transfer{
         that.exitDraw()
     }
     changeColor(color,index){
-        that.color = color
         if(that.rubber){
             that.rubber = false
-            that.ctx.lineWidth = 1
         }
+        if(that.mark){
+            that.mark = false
+        }
+        that.color = color
+        that.ctx.lineWidth = 1
         that.toolStyle = []
         // that.toolStyle[index] = `background:white;border:7px solid ${color};`
-        that.toolStyle[index] = 'box-shadow:pink 0px 0px 30px 10px'
+        that.toolStyle[index] = 'box-shadow:aqua 0px 0px 30px 10px'
     }
     selectRubber(){
+        if(that.mark){
+            that.mark = false
+        }
         that.color = 'white'
         that.ctx.lineWidth = 15
         if(!that.rubber){
@@ -129,10 +135,22 @@ class Transfer{
             that.toolStyle[5] = `border: 1.5px dotted skyblue;`
         }
     }
+    selectMark(){
+        if(that.rubber){
+            that.rubber = false
+        }
+        that.color = '#FF00FF'
+        that.ctx.lineWidth = 5
+        if(!that.mark){
+            that.mark = true
+            that.toolStyle = []
+            that.toolStyle[6] = `border: 1.5px dotted skyblue;`
+        }
+    }
     exitDraw(){
         that.drawShow = 'none'
         that.color = 'black'
-        that.toolStyle = [,,,,'box-shadow:pink 0px 0px 30px 10px']
+        that.toolStyle = [,,,,'box-shadow:aqua 0px 0px 30px 10px']
     }
     initPen(){
         let currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
@@ -216,6 +234,8 @@ class Transfer{
         if(that.tag){
             if(that.color === 'white'){
                 that.ctx.lineWidth = 15
+            }else if(that.color === '#FF00FF'){
+                that.ctx.lineWidth = 5
             }else{
                 that.ctx.lineWidth = 1
             }
