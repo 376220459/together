@@ -168,11 +168,6 @@ class Transfer{
     start(e){
         that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
         that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
-        if(that.color === 'white'){
-            that.ctx.lineWidth = 15
-        }else{
-            that.ctx.lineWidth = 1
-        }
         that.path = new Path2D()
         that.path.moveTo(that.x,that.y)
         that.tag = true
@@ -183,17 +178,22 @@ class Transfer{
         that.currentLine.points.push([that.x,that.y])
     }
     otherStart(e){
-        if(that.color === 'white'){
-            that.ctx.lineWidth = 15
-        }else{
-            that.ctx.lineWidth = 1
-        }
+        // if(that.color === 'white'){
+        //     that.ctx.lineWidth = 15
+        // }else{
+        //     that.ctx.lineWidth = 1
+        // }
         that.pens[e.ip].path = new Path2D()
         that.pens[e.ip].path.moveTo(e.clientX,e.clientY)
         that.pens[e.ip].tag = true
     }
     drawing(e){
         if(that.tag){
+            if(that.color === 'white'){
+                that.ctx.lineWidth = 15
+            }else{
+                that.ctx.lineWidth = 1
+            }
             that.ctx.strokeStyle = that.color
             that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
             that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
