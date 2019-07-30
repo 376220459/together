@@ -206,6 +206,10 @@ ipc.on('notice-main',(event, arg)=>{
         }),'8066',e)
       }
     })
+    server.send(JSON.stringify({
+      status: 'updateHomes',
+      homes: homes
+    }),'8066',multicastAddr)
   }else if(arg.status == 'getIP'){
     me = event.sender
     me.send('notice-ip', {
@@ -239,6 +243,7 @@ ipc.on('notice-main',(event, arg)=>{
     }
     homes[homeIndex].members.push(IPAddress)
     homes[homeIndex].members = [...new Set(homes[homeIndex].members)]
+    // homes[homeIndex].
     me.send('notice-vice', {
       status: 'enterHome',
       homes: homes
