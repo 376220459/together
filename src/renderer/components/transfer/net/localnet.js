@@ -95,14 +95,18 @@ class Localnet{
         })
     }
     sendStop(){
-        that.ipc.send('notice-main', {
-            status: 'sendStop',
-            homeName: that.currentHome,
-            ip: that.ip,
-            e: {
-                ip: that.ip
-            }
-        })
+        if(that.currentLine && that.currentLine.points.length > 1){
+            that.ipc.send('notice-main', {
+                status: 'sendStop',
+                homeName: that.currentHome,
+                ip: that.ip,
+                e: {
+                    ip: that.ip
+                },
+                currentLine: that.currentLine
+            })
+            that.currentLine = null
+        }
     }
 }
 

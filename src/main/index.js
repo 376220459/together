@@ -197,6 +197,7 @@ ipc.on('notice-main',(event, arg)=>{
     if(homeIndex === -1){
       return
     }
+    homes[homeIndex].currentDraw.push(arg.currentLine)
     homes[homeIndex].members.forEach(e=>{
       if(e !== IPAddress){
         server.send(JSON.stringify({
@@ -220,7 +221,8 @@ ipc.on('notice-main',(event, arg)=>{
   }else if(arg.status == 'createHome'){
     homes.push({
       homeName: arg.homeName,
-      members: [IPAddress]
+      members: [IPAddress],
+      currentDraw: []
     })
     me.send('notice-vice', {
       status: 'createHome',
