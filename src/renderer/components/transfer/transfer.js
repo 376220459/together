@@ -143,25 +143,27 @@ class Transfer{
 
             let currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
             if(that.homes[currentHomeIndex].currentDraw){
-                that.homes[currentHomeIndex].currentDraw.forEach(e=>{
-                    let ctx = canvas.getContext("2d")
-                    let path = new Path2D()
-                    ctx.strokeStyle = e.color
-                    if(e.color === 'white'){
-                        ctx.lineWidth = 15
-                    }else{
-                        ctx.lineWidth = 1
-                    }
-                    e.points.forEach((item,index)=>{
-                        if(index == 0){
-                            path.moveTo(item[0],item[1])
+                setTimeout(() => {
+                    that.homes[currentHomeIndex].currentDraw.forEach(e=>{
+                        let ctx = canvas.getContext("2d")
+                        let path = new Path2D()
+                        ctx.strokeStyle = e.color
+                        if(e.color === 'white'){
+                            ctx.lineWidth = 15
                         }else{
-                            
-                            path.lineTo(item[0],item[1])
-                            ctx.stroke(path)
+                            ctx.lineWidth = 1
                         }
+                        e.points.forEach((item,index)=>{
+                            if(index == 0){
+                                path.moveTo(item[0],item[1])
+                            }else{
+                                
+                                path.lineTo(item[0],item[1])
+                                ctx.stroke(path)
+                            }
+                        })
                     })
-                })
+                }, 100);
             }
         }
     }
