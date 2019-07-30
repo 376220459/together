@@ -13,6 +13,7 @@ class Internet{
             if(obj.status == 'addNewHome'){
                 that.homes = obj.homes
                 this.enterHome(that.homes[that.homes.length - 1].homeName)
+                that.openDraw()
             }else if(obj.status == 'getHomes'){
                 that.homes = obj.homes
                 that.$message({

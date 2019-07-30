@@ -35,10 +35,6 @@ let server = ws.createServer(conn=>{
         }else if(obj.status == 'connect'){
             users[obj.ip] = conn
         }else if(obj.status == 'enterHome'){
-            users[obj.ip].sendText(JSON.stringify({
-                status: 'enterHome',
-                homes: homes
-            }));
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
             if(homeIndex === -1){
                 return
@@ -52,6 +48,11 @@ let server = ws.createServer(conn=>{
                         homes: homes
                     }));
                 })
+                
+                users[obj.ip].sendText(JSON.stringify({
+                    status: 'enterHome',
+                    homes: homes
+                }));
             }
         }else if(obj.status == 'exitHome'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)

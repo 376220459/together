@@ -7,8 +7,8 @@
 
     <div class="create-home" v-if="createHomeIf">
       <i class="el-icon-close" title="关闭" @click="closeCreateHome"></i>
-      <el-input v-model="newHomeName" placeholder="请输入房间名" maxlength="9"></el-input>
-      <el-button @click="createHome" @keydown.enter="createHome" round type="success">Create</el-button>
+      <el-input v-model="newHomeName" placeholder="请输入房间名" maxlength="9" @keydown.enter.native="createHome" autofocus></el-input>
+      <el-button @click="createHome" round type="success">Create</el-button>
     </div>
 
     <div class="title">Hello，欢迎来到协作助手</div>
