@@ -1,5 +1,5 @@
 <template>
-  <div class="whole">
+  <div class="whole" v-loading="loading" element-loading-text="努力加载画板中..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)">
     <div class="select-net" v-if="!(internet || localnet)">
       <el-button @click="selectNet('localnet')" round type="primary">使用内网</el-button>
       <el-button @click="selectNet('internet')" round type="primary">使用公网</el-button>
@@ -80,6 +80,7 @@ let localnet = new Localnet(),
 export default {
   data() {
     return {
+      loading: false,
       currentLine: null,
       rubber: false,
       pens:{},

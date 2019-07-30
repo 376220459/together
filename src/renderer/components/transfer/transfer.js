@@ -43,35 +43,7 @@ class Transfer{
         window.addEventListener('resize',debounce(()=>{
             that.drawShow = 'none'
             this.openDraw()
-            // if(canvas.style.display == 'block'){
-            //     canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
-            //     canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
-            // }
-            // let currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
-            // if(that.homes[currentHomeIndex].currentDraw){
-            //     setTimeout(() => {
-            //         that.homes[currentHomeIndex].currentDraw.forEach(e=>{
-            //             let ctx = canvas.getContext("2d")
-            //             let path = new Path2D()
-            //             ctx.strokeStyle = e.color
-            //             if(e.color === 'white'){
-            //                 ctx.lineWidth = 15
-            //             }else{
-            //                 ctx.lineWidth = 1
-            //             }
-            //             e.points.forEach((item,index)=>{
-            //                 if(index == 0){
-            //                     path.moveTo(item[0],item[1])
-            //                 }else{
-                                
-            //                     path.lineTo(item[0],item[1])
-            //                     ctx.stroke(path)
-            //                 }
-            //             })
-            //         })
-            //     }, 100);
-            // }
-        },500),false)
+        },100),false)
     }
     openInternet(){
         internet.openInternet(that)
@@ -179,6 +151,10 @@ class Transfer{
     }
     openDraw(){
         if(that.drawShow == 'none'){
+            that.loading = true
+            setTimeout(() => {
+                that.loading = false
+            }, 1000);
             that.drawShow = 'block'
             setTimeout(() => {
                 canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
