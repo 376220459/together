@@ -48,6 +48,12 @@ let server = ws.createServer(conn=>{
                         homes: homes
                     }));
                 })
+
+                conn.sendText(JSON.stringify({
+                    status: 'getHomes',
+                    enter: true,
+                    homes: homes
+                }));
             }
         }else if(obj.status == 'exitHome'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
