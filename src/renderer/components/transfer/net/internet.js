@@ -23,9 +23,9 @@ class Internet{
                 if(that.currentHome){
                     that.initPen()
                 }
-                if(obj.enter){
-                    that.openDraw()
-                }
+            }else if(obj.status == 'enterHome'){
+                that.homes = obj.homes
+                that.openDraw()
             }else if(obj.status == 'otherStart'){
                 that.otherStart(obj.e)
             }else if(obj.status == 'otherDrawing'){
@@ -78,7 +78,9 @@ class Internet{
     }
     enterHome(item){
         that.currentHome = item
-        // that.openDraw()
+        // setTimeout(() => {
+        //     that.openDraw()
+        // }, 0);
         ws.send(JSON.stringify({
             status: 'enterHome',
             homeName: that.currentHome,
