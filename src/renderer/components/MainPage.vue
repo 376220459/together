@@ -75,27 +75,7 @@ let localnet = new Localnet(),
     internet = new Internet(),
     transfer = new Transfer()
 
-function debounce(func,wait){
-  let id = null;
-  return function(){
-    let args = arguments;
-    let that = this;
-    if(id){
-      window.clearTimeout(id);
-    }
-    id = setTimeout(() => {
-      func.apply(that,args)
-    }, wait);
-  }
-}
-window.addEventListener('resize',debounce(function(){
-  let canvas = document.getElementById('canvas')
-  let canvasDiv = document.getElementById('canvasDiv')
-  if(canvas.style.display == 'block'){
-    canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
-    canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
-  }
-},500),false)
+
 
 export default {
   data() {
@@ -115,7 +95,7 @@ export default {
       drawShow: 'none',
       createHomeIf: false,
       color: 'black',
-      toolStyle: [,,,,'background:white;border:7px solid black;'],
+      toolStyle: [,,,,'box-shadow:pink 0px 0px 30px 10px'],
       otherColor: 'black',
       connections: [],
       ctx: null,
@@ -195,6 +175,7 @@ export default {
   },
   mounted() {
     transfer.init(this)
+    
   }
 }
 </script>
