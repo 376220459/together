@@ -131,7 +131,8 @@ let server = ws.createServer(conn=>{
             homes[homeIndex].members.forEach(e=>{
                 users[e].sendText(JSON.stringify({
                     status: 'updateCurrentDraw',
-                    currentDraw: homes[homeIndex].currentDraw
+                    currentDraw: homes[homeIndex].currentDraw,
+                    deleteLine: true
                 }));
             })
         }else if(obj.status == 'deleteMarkLine'){

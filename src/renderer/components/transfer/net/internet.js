@@ -32,15 +32,38 @@ class Internet{
             }else if(obj.status == 'otherStop'){
                 that.otherStop(obj.e)
             }else if(obj.status == 'updateCurrentDraw'){
+                let canvas = document.getElementById('canvas')
                 if(that.currentHome){
                     let homeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
                     that.homes[homeIndex].currentDraw = obj.currentDraw
+                    if(obj.deleteLine){
+                        that.ctx.clearRect(0,0,canvas.width,canvas.height)
+                        that.homes[homeIndex].currentDraw.forEach(e=>{
+                            let ctx = canvas.getContext("2d")
+                            let path = new Path2D()
+                            ctx.strokeStyle = e.color
+                            if(e.color === 'white'){
+                                ctx.lineWidth = 15
+                            }else{
+                                ctx.lineWidth = 1
+                            }
+                            e.points.forEach((item,index)=>{
+                                if(index == 0){
+                                    path.moveTo(item[0],item[1])
+                                }else{
+                                    
+                                    path.lineTo(item[0],item[1])
+                                    ctx.stroke(path)
+                                }
+                            })
+                        })
+                    }
                 }
             }else if(obj.status == 'deleteMarkLine'){
                 let canvas = document.getElementById('canvas')
                 let ctx = canvas.getContext("2d")
-                ctx.strokeStyle = '#ffffff'
-                ctx.lineWidth = 2
+                ctx.strokeStyle = 'white'
+                ctx.lineWidth = 1
                 obj.points.forEach((item,index)=>{
                     if(index == 0){
                         ctx.moveTo(item[0],item[1])
@@ -162,22 +185,22 @@ class Internet{
                 for(let i = 0;i < e.points.length;i++){
                     if(that.markpen.isPointInPath(e.points[i][0],e.points[i][1])){
                         // console.log(e.points[i][0],e.points[i][1])
-                        ws.send(JSON.stringify({
-                            status: 'deleteMarkLine',
-                            homeName: that.currentHome,
-                            points: e.points
-                        }));
-                        let ctx = canvas.getContext("2d")
-                        ctx.strokeStyle = '#ffffff'
-                        ctx.lineWidth = 2
-                        e.points.forEach((item,index)=>{
-                            if(index == 0){
-                                ctx.moveTo(item[0],item[1])
-                            }else{
-                                ctx.lineTo(item[0],item[1])
-                                ctx.stroke()
-                            }
-                        })
+                        // ws.send(JSON.stringify({
+                        //     status: 'deleteMarkLine',
+                        //     homeName: that.currentHome,
+                        //     points: e.points
+                        // }));
+                        // let ctx = canvas.getContext("2d")
+                        // ctx.strokeStyle = '#ffffff'
+                        // ctx.lineWidth = 2
+                        // e.points.forEach((item,index)=>{
+                        //     if(index == 0){
+                        //         ctx.moveTo(item[0],item[1])
+                        //     }else{
+                        //         ctx.lineTo(item[0],item[1])
+                        //         ctx.stroke()
+                        //     }
+                        // })
                         ws.send(JSON.stringify({
                             status: 'deleteLine',
                             homeName: that.currentHome,
