@@ -36,6 +36,19 @@ class Internet{
                     let homeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
                     that.homes[homeIndex].currentDraw = obj.currentDraw
                 }
+            }else if(obj.status == 'deleteMarkLine'){
+                let canvas = document.getElementById('canvas')
+                let ctx = canvas.getContext("2d")
+                ctx.strokeStyle = '#ffffff'
+                ctx.lineWidth = 2
+                obj.points.forEach((item,index)=>{
+                    if(index == 0){
+                        ctx.moveTo(item[0],item[1])
+                    }else{
+                        ctx.lineTo(item[0],item[1])
+                        ctx.stroke()
+                    }
+                })
             }
         }
         ws.onopen = ()=>{
@@ -148,21 +161,21 @@ class Internet{
                 // console.log(that.markpen)
                 for(let i = 0;i < e.points.length;i++){
                     if(that.markpen.isPointInPath(e.points[i][0],e.points[i][1])){
-                        console.log(e.points[i][0],e.points[i][1])
+                        // console.log(e.points[i][0],e.points[i][1])
+                        ws.send(JSON.stringify({
+                            status: 'deleteMarkLine',
+                            homeName: that.currentHome,
+                            points: e.points
+                        }));
                         let ctx = canvas.getContext("2d")
                         ctx.strokeStyle = '#ffffff'
                         ctx.lineWidth = 2
                         e.points.forEach((item,index)=>{
                             if(index == 0){
                                 ctx.moveTo(item[0],item[1])
-                                this.sendStart(item[0],item[1])
                             }else{
                                 ctx.lineTo(item[0],item[1])
                                 ctx.stroke()
-                                this.sendDrawing(item[0],item[1])
-                                if(index == e.points.length - 1){
-                                    this.sendStop()
-                                }
                             }
                         })
                         ws.send(JSON.stringify({

@@ -141,7 +141,7 @@ class Transfer{
         if(that.rubber){
             that.rubber = false
         }
-        that.color = 'white'
+        // that.color = 'white'
         if(!that.mark){
             that.mark = true
             that.toolStyle = []
