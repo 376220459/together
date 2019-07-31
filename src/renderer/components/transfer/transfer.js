@@ -41,8 +41,10 @@ class Transfer{
             }
         }
         window.addEventListener('resize',debounce(()=>{
-            that.drawShow = 'none'
-            this.openDraw()
+            if(that.drawShow !== 'none'){
+                that.drawShow = 'none'
+                this.openDraw()
+            }
         },100),false)
     }
     openInternet(){
@@ -139,8 +141,6 @@ class Transfer{
         if(that.rubber){
             that.rubber = false
         }
-        that.color = '#FF00FF'
-        that.ctx.lineWidth = 5
         if(!that.mark){
             that.mark = true
             that.toolStyle = []
@@ -150,6 +150,7 @@ class Transfer{
     exitDraw(){
         that.drawShow = 'none'
         that.color = 'black'
+        that.mark = false
         that.toolStyle = [,,,,'box-shadow:aqua 0px 0px 30px 10px']
     }
     initPen(){
@@ -211,6 +212,18 @@ class Transfer{
     start(e){
         that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
         that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
+        
+        if(that.mark){
+            that.currentImageData = that.ctx.getImageData(0,0,canvas.width,canvas.height)
+            that.markpen = canvas.getContext('2d')
+            that.markpen.strokeStyle = '#FF00FF'
+            that.markpen.lineWidth = 5
+			that.markpen.beginPath()
+            that.markpen.moveTo(that.x,that.y)
+            that.tag = true
+            return
+        }
+
         that.path = new Path2D()
         that.path.moveTo(that.x,that.y)
         that.tag = true
@@ -231,17 +244,24 @@ class Transfer{
         that.pens[e.ip].tag = true
     }
     drawing(e){
+        that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
+        that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
+
+        if(that.mark && that.markpen){
+            if(that.tag){
+                that.markpen .lineTo(that.x,that.y)
+                that.markpen .stroke()
+            }
+            return
+        }
+        
         if(that.tag){
             if(that.color === 'white'){
                 that.ctx.lineWidth = 15
-            }else if(that.color === '#FF00FF'){
-                that.ctx.lineWidth = 5
             }else{
                 that.ctx.lineWidth = 1
             }
             that.ctx.strokeStyle = that.color
-            that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
-            that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
             that.path.lineTo(that.x,that.y)
             that.ctx.stroke(that.path)
 
@@ -261,6 +281,11 @@ class Transfer{
         }
     }
     stop(){
+        if(that.mark && that.markpen){
+            if(that.internet){
+                internet.checkDelete()
+            }
+        }
         that.tag = false
     }
     otherStop(e){

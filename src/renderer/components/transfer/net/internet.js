@@ -31,6 +31,11 @@ class Internet{
                 that.otherDrawing(obj.e)
             }else if(obj.status == 'otherStop'){
                 that.otherStop(obj.e)
+            }else if(obj.status == 'updateCurrentDraw'){
+                if(that.currentHome){
+                    let homeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
+                    that.homes[homeIndex].currentDraw = obj.currentDraw
+                }
             }
         }
         ws.onopen = ()=>{
@@ -132,6 +137,40 @@ class Internet{
             }));
             that.currentLine = null
         }
+    }
+    checkDelete(){
+        that.ctx.putImageData(that.currentImageData,0,0);
+        that.currentImageData = null
+        let canvas = document.getElementById('canvas')
+        let homeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
+        that.homes[homeIndex].currentDraw.forEach(e=>{
+            if(e.color !== 'white'){
+                // console.log(that.markpen)
+                for(let i = 0;i < e.points.length;i++){
+                    if(that.markpen.isPointInPath(e.points[i][0],e.points[i][1])){
+                        console.log(e.points[i][0],e.points[i][1])
+                        let ctx = canvas.getContext("2d")
+                        ctx.strokeStyle = '#ffffff'
+                        ctx.lineWidth = 2
+                        e.points.forEach((item,index)=>{
+                            if(index == 0){
+                                ctx.moveTo(item[0],item[1])
+                            }else{
+                                ctx.lineTo(item[0],item[1])
+                                ctx.stroke()
+                            }
+                        })
+                        ws.send(JSON.stringify({
+                            status: 'deleteLine',
+                            homeName: that.currentHome,
+                            line: e
+                        }));
+                        break
+                    }
+                }
+            }
+        })
+        that.markpen = null
     }
 }
 

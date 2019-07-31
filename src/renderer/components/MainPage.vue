@@ -85,6 +85,8 @@ export default {
       currentLine: null,
       rubber: false,
       mark: false,
+      markpen: null,
+      currentImageData: null,
       pens:{},
       localnetOpened: false,
       ipc: null,
