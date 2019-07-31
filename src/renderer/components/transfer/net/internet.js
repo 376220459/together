@@ -155,9 +155,14 @@ class Internet{
                         e.points.forEach((item,index)=>{
                             if(index == 0){
                                 ctx.moveTo(item[0],item[1])
+                                this.sendStart(item[0],item[1])
                             }else{
                                 ctx.lineTo(item[0],item[1])
                                 ctx.stroke()
+                                this.sendDrawing(item[0],item[1])
+                                if(index == e.points.length - 1){
+                                    this.sendStop()
+                                }
                             }
                         })
                         ws.send(JSON.stringify({

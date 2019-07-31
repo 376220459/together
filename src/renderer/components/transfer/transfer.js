@@ -141,6 +141,7 @@ class Transfer{
         if(that.rubber){
             that.rubber = false
         }
+        that.color = 'white'
         if(!that.mark){
             that.mark = true
             that.toolStyle = []
@@ -292,6 +293,9 @@ class Transfer{
         that.pens[e.ip].tag = false
     }
     sendStart(e){
+        if(that.mark){
+            return
+        }
         let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
         let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
         if(that.internet){
@@ -301,6 +305,9 @@ class Transfer{
         }
     }
     sendDrawing(e){
+        if(that.mark){
+            return
+        }
         let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
         let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
         if(that.internet){
@@ -310,6 +317,9 @@ class Transfer{
         }
     }
     sendStop(){
+        if(that.mark){
+            return
+        }
         if(that.internet){
             internet.sendStop()
         }else{
