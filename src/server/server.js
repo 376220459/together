@@ -135,19 +135,6 @@ let server = ws.createServer(conn=>{
                     deleteLine: true
                 }));
             })
-        }else if(obj.status == 'deleteMarkLine'){
-            let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
-            if(homeIndex === -1){
-                return
-            }
-            homes[homeIndex].members.forEach(e=>{
-                if(e !== obj.ip){
-                    users[e].sendText(JSON.stringify({
-                        status: 'deleteMarkLine',
-                        points: obj.points
-                    }));
-                }
-            })
         }
     })
     .on('close',()=>{

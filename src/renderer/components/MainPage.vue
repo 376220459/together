@@ -85,6 +85,7 @@ export default {
       currentLine: null,
       rubber: false,
       mark: false,
+      markPoints: [],
       markpen: null,
       currentImageData: null,
       pens:{},
@@ -156,8 +157,8 @@ export default {
     otherDrawing(e){
       transfer.otherDrawing(e)
     },
-    stop(){
-      transfer.stop()
+    stop(e){
+      transfer.stop(e)
     },
     otherStop(e){
       transfer.otherStop(e)

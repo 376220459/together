@@ -222,6 +222,8 @@ class Transfer{
 			that.markpen.beginPath()
             that.markpen.moveTo(that.x,that.y)
             that.tag = true
+
+            that.markPoints[0] = [that.x,that.y]
             return
         }
 
@@ -281,10 +283,18 @@ class Transfer{
             that.pens[e.ip].ctx.stroke(that.pens[e.ip].path)
         }
     }
-    stop(){
+    stop(e){
+        if(e){
+            that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
+            that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
+        }
+
         if(that.mark && that.markpen){
+            that.markPoints[1] = [that.x,that.y]
             if(that.internet){
                 internet.checkDelete()
+            }else{
+                localnet.checkDelete()
             }
         }
         that.tag = false

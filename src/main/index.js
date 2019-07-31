@@ -273,5 +273,26 @@ ipc.on('notice-main',(event, arg)=>{
       status: 'updateHomes',
       homes: homes
     }),'8066',multicastAddr)
+  }else if(arg.status == 'deleteLine'){
+    let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
+    if(homeIndex === -1){
+        return
+    }
+    let lineIndex = homes[homeIndex].currentDraw.map(e=>JSON.stringify(e)).indexOf(JSON.stringify(arg.line))
+    if(lineIndex === -1){
+        return
+    }
+    homes[homeIndex].currentDraw.splice(lineIndex,1)
+    homes[homeIndex].members.forEach(e=>{
+      server.send(JSON.stringify({
+        status: 'updateCurrentDraw',
+        currentDraw: homes[homeIndex].currentDraw
+      }),'8066',multicastAddr)
+        // users[e].sendText(JSON.stringify({
+        //     status: 'updateCurrentDraw',
+        //     currentDraw: homes[homeIndex].currentDraw,
+        //     deleteLine: true
+        // }));
+    })
   }
 })

@@ -59,19 +59,6 @@ class Internet{
                         })
                     }
                 }
-            }else if(obj.status == 'deleteMarkLine'){
-                let canvas = document.getElementById('canvas')
-                let ctx = canvas.getContext("2d")
-                ctx.strokeStyle = 'white'
-                ctx.lineWidth = 1
-                obj.points.forEach((item,index)=>{
-                    if(index == 0){
-                        ctx.moveTo(item[0],item[1])
-                    }else{
-                        ctx.lineTo(item[0],item[1])
-                        ctx.stroke()
-                    }
-                })
             }
         }
         ws.onopen = ()=>{
@@ -118,9 +105,6 @@ class Internet{
     }
     enterHome(item){
         that.currentHome = item
-        // setTimeout(() => {
-        //     that.openDraw()
-        // }, 0);
         ws.send(JSON.stringify({
             status: 'enterHome',
             homeName: that.currentHome,
@@ -175,32 +159,17 @@ class Internet{
         }
     }
     checkDelete(){
+        let canvas = document.getElementById('canvas')
+        let ctx = canvas.getContext('2d')
+        ctx.strokeStyle = 'white'
+        ctx.rect(that.markPoints[0][0],that.markPoints[0][1],that.markPoints[1][0] - that.markPoints[0][0],that.markPoints[1][1] - that.markPoints[0][1])
         that.ctx.putImageData(that.currentImageData,0,0);
         that.currentImageData = null
-        let canvas = document.getElementById('canvas')
         let homeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
         that.homes[homeIndex].currentDraw.forEach(e=>{
             if(e.color !== 'white'){
-                // console.log(that.markpen)
                 for(let i = 0;i < e.points.length;i++){
-                    if(that.markpen.isPointInPath(e.points[i][0],e.points[i][1])){
-                        // console.log(e.points[i][0],e.points[i][1])
-                        // ws.send(JSON.stringify({
-                        //     status: 'deleteMarkLine',
-                        //     homeName: that.currentHome,
-                        //     points: e.points
-                        // }));
-                        // let ctx = canvas.getContext("2d")
-                        // ctx.strokeStyle = '#ffffff'
-                        // ctx.lineWidth = 2
-                        // e.points.forEach((item,index)=>{
-                        //     if(index == 0){
-                        //         ctx.moveTo(item[0],item[1])
-                        //     }else{
-                        //         ctx.lineTo(item[0],item[1])
-                        //         ctx.stroke()
-                        //     }
-                        // })
+                    if(ctx.isPointInPath(e.points[i][0],e.points[i][1])){
                         ws.send(JSON.stringify({
                             status: 'deleteLine',
                             homeName: that.currentHome,
@@ -212,6 +181,7 @@ class Internet{
             }
         })
         that.markpen = null
+        that.markPoints = []
     }
 }
 
