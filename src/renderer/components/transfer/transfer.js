@@ -222,8 +222,15 @@ class Transfer{
 			that.markpen.beginPath()
             that.markpen.moveTo(that.x,that.y)
             that.tag = true
-
             that.markPoints[0] = [that.x,that.y]
+
+            that.markLine = {}
+            that.markLine.points = []
+            that.markLine.points.push([that.x,that.y])
+            that.markLine.x1 = that.x
+            that.markLine.y1 = that.y
+            that.markLine.x2 = that.x
+            that.markLine.y2 = that.y
             return
         }
 
@@ -235,6 +242,10 @@ class Transfer{
         that.currentLine.color = that.color
         that.currentLine.points = []
         that.currentLine.points.push([that.x,that.y])
+        that.currentLine.x1 = that.x
+        that.currentLine.y1 = that.y
+        that.currentLine.x2 = that.x
+        that.currentLine.y2 = that.y
     }
     otherStart(e){
         // if(that.color === 'white'){
@@ -254,6 +265,13 @@ class Transfer{
             if(that.tag){
                 that.markpen .lineTo(that.x,that.y)
                 that.markpen .stroke()
+
+
+                that.markLine.points.push([that.x,that.y])
+                if(that.x < that.markLine.x1)   that.markLine.x1 = that.x
+                if(that.y < that.markLine.y1)   that.markLine.y1 = that.y
+                if(that.x > that.markLine.x2)   that.markLine.x2 = that.x
+                if(that.y > that.markLine.y2)   that.markLine.y2 = that.y
             }
             return
         }
@@ -269,6 +287,10 @@ class Transfer{
             that.ctx.stroke(that.path)
 
             that.currentLine.points.push([that.x,that.y])
+            if(that.x < that.currentLine.x1)   that.currentLine.x1 = that.x
+            if(that.y < that.currentLine.y1)   that.currentLine.y1 = that.y
+            if(that.x > that.currentLine.x2)   that.currentLine.x2 = that.x
+            if(that.y > that.currentLine.y2)   that.currentLine.y2 = that.y
         }
     }
     otherDrawing(e){

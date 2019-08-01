@@ -158,6 +158,19 @@ function openLocalnet(){
             homes: homes
           })
         }
+      }else if(msg.status == 'updateCurrentDraw'){
+        if(msg.deleteLine){
+          me.send('notice-vice', {
+            status: 'updateCurrentDraw',
+            currentDraw: msg.currentDraw,
+            deleteLine: true
+          })
+        }else{
+          me.send('notice-vice', {
+            status: 'updateCurrentDraw',
+            currentDraw: msg.currentDraw
+          })
+        }
       }
   })
 
@@ -198,7 +211,13 @@ ipc.on('notice-main',(event, arg)=>{
       return
     }
     homes[homeIndex].currentDraw.push(arg.currentLine)
+    
     homes[homeIndex].members.forEach(e=>{
+      server.send(JSON.stringify({
+        status: 'updateCurrentDraw',
+        currentDraw: homes[homeIndex].currentDraw
+      }),'8066',e)
+
       if(e !== IPAddress){
         server.send(JSON.stringify({
           status: 'otherStop',
@@ -286,13 +305,9 @@ ipc.on('notice-main',(event, arg)=>{
     homes[homeIndex].members.forEach(e=>{
       server.send(JSON.stringify({
         status: 'updateCurrentDraw',
-        currentDraw: homes[homeIndex].currentDraw
-      }),'8066',multicastAddr)
-        // users[e].sendText(JSON.stringify({
-        //     status: 'updateCurrentDraw',
-        //     currentDraw: homes[homeIndex].currentDraw,
-        //     deleteLine: true
-        // }));
+        currentDraw: homes[homeIndex].currentDraw,
+        deleteLine: true
+      }),'8066',e)
     })
   }
 })

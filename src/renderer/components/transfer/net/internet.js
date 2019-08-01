@@ -160,28 +160,86 @@ class Internet{
     }
     checkDelete(){
         let canvas = document.getElementById('canvas')
-        let ctx = canvas.getContext('2d')
-        ctx.strokeStyle = 'white'
-        ctx.rect(that.markPoints[0][0],that.markPoints[0][1],that.markPoints[1][0] - that.markPoints[0][0],that.markPoints[1][1] - that.markPoints[0][1])
         that.ctx.putImageData(that.currentImageData,0,0);
         that.currentImageData = null
         let homeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
-        that.homes[homeIndex].currentDraw.forEach(e=>{
-            if(e.color !== 'white'){
-                for(let i = 0;i < e.points.length;i++){
-                    if(ctx.isPointInPath(e.points[i][0],e.points[i][1])){
-                        ws.send(JSON.stringify({
-                            status: 'deleteLine',
-                            homeName: that.currentHome,
-                            line: e
-                        }));
-                        break
+        if(this.checkIsLine(that.markLine.points)){//直线
+            let last = that.markLine.points.length - 1
+            let k = (that.markLine.points[0][1] - that.markLine.points[last][1]) / (that.markLine.points[0][0] - that.markLine.points[last][0])
+            let b = (that.markLine.points[0][1] - k * that.markLine.points[0][0])
+            that.homes[homeIndex].currentDraw.forEach(e=>{
+                if(e.color !== 'white'){
+                    if((this.judgePoint(k,b,e.x1,e.y1) == true && this.judgePoint(k,b,e.x1,e.y2) == true && this.judgePoint(k,b,e.x2,e.y1) == true && this.judgePoint(k,b,e.x2,e.y2) == true) || (this.judgePoint(k,b,e.x1,e.y1) == false && this.judgePoint(k,b,e.x1,e.y2) == false && this.judgePoint(k,b,e.x2,e.y1) == false && this.judgePoint(k,b,e.x2,e.y2) == false)){
+                        // break
+                    }else{
+                        let ctx = canvas.getContext('2d')
+                        ctx.beginPath()
+                        ctx.strokeStyle = 'white'
+                        ctx.ellipse((that.markPoints[0][0] + that.markPoints[1][0]) / 2,(that.markPoints[0][1] + that.markPoints[1][1]) / 2,Math.sqrt(Math.pow(that.markPoints[0][0] - that.markPoints[1][0],2) + Math.pow(that.markPoints[0][1] - that.markPoints[1][1],2)) / 2,20,Math.atan((that.markPoints[0][1] - that.markPoints[1][1]) / (that.markPoints[0][0] - that.markPoints[1][0])),0,2*Math.PI);
+                        for(let i = 0;i < e.points.length;i++){
+                            if(ctx.isPointInPath(e.points[i][0],e.points[i][1])){
+                                ws.send(JSON.stringify({
+                                    status: 'deleteLine',
+                                    homeName: that.currentHome,
+                                    line: e
+                                }));
+                                break
+                            }
+                        }
                     }
                 }
-            }
-        })
+            })
+        }else{//曲线
+            let ctx = canvas.getContext('2d')
+            ctx.beginPath()
+            ctx.strokeStyle = 'red'
+            ctx.rect(that.markLine.x1,that.markLine.y1,Math.abs(that.markLine.x1 - that.markLine.x2),Math.abs(that.markLine.y1 - that.markLine.y2))
+            that.homes[homeIndex].currentDraw.forEach(e=>{
+                if(e.color !== 'white'){
+                    for(let i = 0;i < e.points.length;i++){
+                        if(ctx.isPointInPath(e.points[i][0],e.points[i][1])){
+                            ws.send(JSON.stringify({
+                                status: 'deleteLine',
+                                homeName: that.currentHome,
+                                line: e
+                            }));
+                            break
+                        }
+                    }
+                }
+            })
+        }
         that.markpen = null
         that.markPoints = []
+        that.markLine = null
+    }
+    checkIsLine(pointArray){
+        if (pointArray === null || pointArray === undefined || pointArray.length < 3) {
+            return false;
+        }
+        let startX = pointArray[0][0];
+        let startY = pointArray[0][1];
+
+        let endX = pointArray[pointArray.length - 1][0];
+        let endY = pointArray[pointArray.length - 1][1];
+
+        let tan = this.atan(endX - startX, endY - startY);
+        for (let i in pointArray) {
+            if (i > 4) {//这里相隔4个点比较一次
+                let tantemp = this.atan(pointArray[i][0] - pointArray[i - 4][0],
+                    pointArray[i][1] - pointArray[i - 4][1]);
+                if (Math.abs(tantemp - tan) > 16) {//允许误差在16度
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    atan(x, y){
+        return Math.atan(y / x) * 180 / Math.PI;
+    }
+    judgePoint(k,b,x,y){
+        return y > k * x + b
     }
 }
 

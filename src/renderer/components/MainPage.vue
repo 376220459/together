@@ -86,6 +86,7 @@ export default {
       rubber: false,
       mark: false,
       markPoints: [],
+      markLine: null,
       markpen: null,
       currentImageData: null,
       pens:{},
