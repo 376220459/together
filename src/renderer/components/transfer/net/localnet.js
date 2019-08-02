@@ -35,7 +35,6 @@ class Localnet{
                 if(that.currentHome){
                     let homeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
                     that.homes[homeIndex].currentDraw = arg.currentDraw
-                    console.log(that.homes[homeIndex].currentDraw)
                     if(arg.deleteLine){
                         that.ctx.clearRect(0,0,canvas.width,canvas.height)
                         that.homes[homeIndex].currentDraw.forEach(e=>{

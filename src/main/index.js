@@ -11,11 +11,14 @@ const winURL = process.env.NODE_ENV === 'development'
 
 function createWindow () {
   mainWindow = new BrowserWindow({
-    height: 600,
-    useContentSize: true,
-    width: 1100
+    // height: 600,
+    // width: 1100,
+    // useContentSize: true
+    show: false
   })
 
+  mainWindow.maximize()
+  
   mainWindow.loadURL(winURL)
 
   mainWindow.on('closed', () => {

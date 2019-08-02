@@ -9,6 +9,9 @@ class Transfer{
         canvas = document.getElementById('canvas')
         canvasDiv = document.getElementById('canvasDiv')
         that = context
+        if(!that.ip){
+            that.loading = true
+        }
         that.ipc = require('electron').ipcRenderer
         that.ipc.send('notice-main', {
             status: 'getIP'
@@ -16,6 +19,9 @@ class Transfer{
         that.ipc.on('notice-ip', (event, arg)=>{
             if(arg.status == 'getIP'){
                 that.ip = arg.ip
+                if(that.loading){
+                    that.loading = false
+                }
             }
         })
         that.ipc.on('notice-close', (event, arg)=>{
@@ -86,8 +92,12 @@ class Transfer{
     }
     createHome(){
         that.newHomeName = that.newHomeName.trim()
-        if(that.newHomeName == '' || that.homes.map(e=>e.homeName).indexOf(that.newHomeName) !== -1){
-            that.$message.error('创建失败，换个名字试试')
+        if(that.newHomeName == ''){
+            that.$message({
+                type: 'warning',
+                message: '空空如也，不知去向~',
+                duration: 1000
+            })
             return
         }
         if(that.internet){ 
@@ -95,6 +105,16 @@ class Transfer{
         }else{
             localnet.createHome()
         }
+        // that.newHomeName = that.newHomeName.trim()
+        // if(that.newHomeName == '' || that.homes.map(e=>e.homeName).indexOf(that.newHomeName) !== -1){
+        //     that.$message.error('创建失败，换个名字试试')
+        //     return
+        // }
+        // if(that.internet){ 
+        //     internet.createHome()
+        // }else{
+        //     localnet.createHome()
+        // }
     }
     enterHome(item){
         if(that.internet){
@@ -155,26 +175,29 @@ class Transfer{
         that.toolStyle = [,,,,'box-shadow:aqua 0px 0px 30px 10px']
     }
     initPen(){
-        let currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
+        // let that.currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
         if(that.currentHome){
-            if(currentHomeIndex === -1){
+            if(that.currentHomeIndex === -1){
                 return
             }
-            that.homes[currentHomeIndex].members.forEach(e=>{
-                that.pens[e] = {}
-                that.pens[e].ctx = canvas.getContext("2d")
-                that.pens[e].ctx.lineWidth = 1
-                that.pens[e].path = new Path2D()
-                that.pens[e].tag = false
+            that.homes[that.currentHomeIndex].members.forEach(e=>{
+                if(e !== that.ip){
+                    that.pens[e] = {}
+                    that.pens[e].ctx = canvas.getContext("2d")
+                    that.pens[e].ctx.lineWidth = 1
+                    that.pens[e].path = new Path2D()
+                    that.pens[e].tag = false
+                }
+                // that.pens[e] = {}
+                // that.pens[e].ctx = canvas.getContext("2d")
+                // that.pens[e].ctx.lineWidth = 1
+                // that.pens[e].path = new Path2D()
+                // that.pens[e].tag = false
             })
         }
     }
     openDraw(){
         if(that.drawShow == 'none'){
-            that.loading = true
-            setTimeout(() => {
-                that.loading = false
-            }, 1000);
             that.drawShow = 'block'
             setTimeout(() => {
                 canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
@@ -182,12 +205,20 @@ class Transfer{
             }, 0);
             that.ctx = canvas.getContext("2d") 
             that.ctx.lineWidth = 1
-            that.initPen()
 
-            let currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
-            if(that.homes[currentHomeIndex].currentDraw){
+            // let that.currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
+            if(that.currentHomeIndex !== -1 && that.homes[that.currentHomeIndex].members.length > 1){
+                that.initPen()
+            }
+
+            if(that.homes[that.currentHomeIndex].currentDraw.length > 0){
+                that.loading = true
                 setTimeout(() => {
-                    that.homes[currentHomeIndex].currentDraw.forEach(e=>{
+                    that.loading = false
+                }, 1000);
+
+                setTimeout(() => {
+                    that.homes[that.currentHomeIndex].currentDraw.forEach(e=>{
                         let ctx = canvas.getContext("2d")
                         let path = new Path2D()
                         ctx.strokeStyle = e.color
@@ -209,6 +240,45 @@ class Transfer{
                 }, 100);
             }
         }
+        // if(that.drawShow == 'none'){
+        //     that.loading = true
+        //     setTimeout(() => {
+        //         that.loading = false
+        //     }, 1000);
+        //     that.drawShow = 'block'
+        //     setTimeout(() => {
+        //         canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
+        //         canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
+        //     }, 0);
+        //     that.ctx = canvas.getContext("2d") 
+        //     that.ctx.lineWidth = 1
+        //     that.initPen()
+
+        //     let that.currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
+        //     if(that.homes[that.currentHomeIndex].currentDraw){
+        //         setTimeout(() => {
+        //             that.homes[that.currentHomeIndex].currentDraw.forEach(e=>{
+        //                 let ctx = canvas.getContext("2d")
+        //                 let path = new Path2D()
+        //                 ctx.strokeStyle = e.color
+        //                 if(e.color === 'white'){
+        //                     ctx.lineWidth = 15
+        //                 }else{
+        //                     ctx.lineWidth = 1
+        //                 }
+        //                 e.points.forEach((item,index)=>{
+        //                     if(index == 0){
+        //                         path.moveTo(item[0],item[1])
+        //                     }else{
+                                
+        //                         path.lineTo(item[0],item[1])
+        //                         ctx.stroke(path)
+        //                     }
+        //                 })
+        //             })
+        //         }, 100);
+        //     }
+        // }
     }
     start(e){
         that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
@@ -221,9 +291,10 @@ class Transfer{
             that.markpen.lineWidth = 5
 			that.markpen.beginPath()
             that.markpen.moveTo(that.x,that.y)
-            that.tag = true
             that.markPoints[0] = [that.x,that.y]
+            that.tag = true
 
+            //开始记录markLine
             that.markLine = {}
             that.markLine.points = []
             that.markLine.points.push([that.x,that.y])
@@ -231,6 +302,7 @@ class Transfer{
             that.markLine.y1 = that.y
             that.markLine.x2 = that.x
             that.markLine.y2 = that.y
+
             return
         }
 
@@ -238,6 +310,7 @@ class Transfer{
         that.path.moveTo(that.x,that.y)
         that.tag = true
 
+        //开始记录currentLine
         that.currentLine = {}
         that.currentLine.color = that.color
         that.currentLine.points = []
@@ -248,11 +321,6 @@ class Transfer{
         that.currentLine.y2 = that.y
     }
     otherStart(e){
-        // if(that.color === 'white'){
-        //     that.ctx.lineWidth = 15
-        // }else{
-        //     that.ctx.lineWidth = 1
-        // }
         that.pens[e.ip].path = new Path2D()
         that.pens[e.ip].path.moveTo(e.clientX,e.clientY)
         that.pens[e.ip].tag = true
@@ -273,6 +341,7 @@ class Transfer{
                 if(that.x > that.markLine.x2)   that.markLine.x2 = that.x
                 if(that.y > that.markLine.y2)   that.markLine.y2 = that.y
             }
+
             return
         }
         

@@ -1,5 +1,5 @@
 <template>
-  <div class="whole" v-loading="loading" element-loading-text="努力加载画板中..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)">
+  <div class="whole" v-loading="loading" element-loading-text="努力加载中..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)">
     <div class="select-net" v-if="!(internet || localnet)">
       <el-button @click="selectNet('localnet')" round type="primary">使用内网</el-button>
       <el-button @click="selectNet('internet')" round type="primary">使用公网</el-button>
@@ -33,7 +33,7 @@
         <el-button class="get-button" type="primary" round @click="getHomes" plain>刷新公网房间列表</el-button>
         <ul v-if="homes.length ? true :false">
           <li class="home-item" v-for="(item, index) in homes" :key="index">
-            <div style="cursor: pointer;">||房间{{ index + 1 }}：{{ item.homeName }}({{ item.members.length }}人)</div>
+            <div style="cursor: pointer;"><i class="iconfont icon-home"></i> 房间{{ index + 1 }}：{{ item.homeName }}</div>
             <el-button round type="success" @click="enterHome(item.homeName)">进入</el-button>
           </li>
         </ul>
@@ -45,7 +45,7 @@
         <el-button class="get-button" @click="getHomes" type="primary" round plain>刷新内网房间列表</el-button>
         <ul v-if="homes.length ? true :false">
           <li class="home-item" v-for="(item, index) in homes" :key="index">
-            <div style="cursor: pointer;">||房间{{ index + 1 }}：{{ item.homeName }}({{ item.members.length }}人)</div>
+            <div style="cursor: pointer;">|~|房间{{ index + 1 }}：{{ item.homeName }}</div>
             <el-button round type="success" @click="enterHome(item.homeName)">进入</el-button>
           </li>
         </ul>
@@ -88,6 +88,7 @@ export default {
       markPoints: [],
       markLine: null,
       markpen: null,
+      deleteLines: [],
       currentImageData: null,
       pens:{},
       localnetOpened: false,
@@ -103,13 +104,16 @@ export default {
       createHomeIf: false,
       color: 'black',
       toolStyle: [,,,,'box-shadow:aqua 0px 0px 30px 10px'],
-      otherColor: 'black',
-      connections: [],
       ctx: null,
       path: null,
       tag: false,
       x: 0,
       y: 0
+    }
+  },
+  computed: {
+    currentHomeIndex(){
+      return this.homes.map(e=>e.homeName).indexOf(this.currentHome)
     }
   },
   methods: {
@@ -185,7 +189,6 @@ export default {
   },
   mounted() {
     transfer.init(this)
-    
   }
 }
 </script>
