@@ -108,7 +108,7 @@ let server = ws.createServer(conn=>{
                 home: homes[homeIndex]
             }));
             for(let key in users){
-                if(key !== 'obj.ip'){
+                if(key !== obj.ip){
                     users[key].sendText(JSON.stringify({
                         status: 'addMember',
                         homeName: obj.homeName,

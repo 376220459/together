@@ -206,7 +206,6 @@ class Transfer{
             that.ctx = canvas.getContext("2d") 
             that.ctx.lineWidth = 1
 
-            // let that.currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
             if(that.currentHomeIndex !== -1 && that.homes[that.currentHomeIndex].members.length > 1){
                 that.initPen()
             }
@@ -231,13 +230,12 @@ class Transfer{
                             if(index == 0){
                                 path.moveTo(item[0],item[1])
                             }else{
-                                
                                 path.lineTo(item[0],item[1])
                                 ctx.stroke(path)
                             }
                         })
                     })
-                }, 100);
+                }, 0)
             }
         }
         // if(that.drawShow == 'none'){

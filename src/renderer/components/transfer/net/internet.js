@@ -81,7 +81,9 @@ class Internet{
             }else if(obj.status == 'addMember'){
                 if(that.currentHome === obj.homeName){
                     // let that.currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
-                    that.homes[that.currentHomeIndex].members.push(obj.ip)
+                    if(that.homes[that.currentHomeIndex].members.indexOf(obj.ip) === -1){
+                        that.homes[that.currentHomeIndex].members.push(obj.ip)
+                    }
                     that.pens[obj.ip] = {}
                     that.pens[obj.ip].ctx = canvas.getContext("2d")
                     that.pens[obj.ip].ctx.lineWidth = 1
@@ -89,7 +91,6 @@ class Internet{
                     that.pens[obj.ip].tag = false
                 }
             }else if(obj.status == 'deleteMember'){
-                console.log('shanchu')
                 if(that.currentHome === obj.homeName){
                     let memberIndex = that.homes[that.currentHomeIndex].members.indexOf(obj.ip)
                     if(memberIndex !== -1){
