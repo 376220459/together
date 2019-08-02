@@ -146,7 +146,7 @@ let server = ws.createServer(conn=>{
             if(memberIndex === -1){
                 return
             }
-            homes[homeIndex].members.splice(memberIndex,1)//删除此人
+            homes[homeIndex].members.splice(memberIndex,1)// server端删除此人
 
             if(homes[homeIndex].members.length){
                 homes[homeIndex].members.forEach(e=>{

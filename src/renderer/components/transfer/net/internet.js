@@ -4,7 +4,7 @@ class Internet{
         that = context
     }
     openInternet(){
-        ws = new WebSocket(`ws://192.168.1.198:8888`)
+        ws = new WebSocket(`ws://192.168.1.196:8888`)
         // ws = new WebSocket('ws://huaban.com')
         ws.onmessage = e=>{
             let obj = JSON.parse(e.data)
@@ -95,6 +95,9 @@ class Internet{
                     let memberIndex = that.homes[that.currentHomeIndex].members.indexOf(obj.ip)
                     if(memberIndex !== -1){
                         that.homes[that.currentHomeIndex].members.splice(memberIndex,1)
+                        console.log(that.homes[that.currentHomeIndex].members)
+                        // let members = that.homes[that.currentHomeIndex].members
+                        // that.homes[that.currentHomeIndex].members = members
                         that.pens[obj.ip] = null
                     }
                 }
@@ -254,20 +257,21 @@ class Internet{
         // }))
     }
     exitHome(){
-        let currentHome = that.currentHome
+        // let currentHome = that.currentHome
         that.homes[that.currentHomeIndex] = {
             homeName: that.currentHome,
             members: [],
             currentDraw: []
         }
+        ws.send(JSON.stringify({
+            status: 'exitHome',
+            homeName: that.currentHome,
+            ip: that.ip
+        }))
         that.exitDraw() //先关闭画板
         that.currentHome = '' //后退房
 
-        ws.send(JSON.stringify({
-            status: 'exitHome',
-            homeName: currentHome,
-            ip: that.ip
-        }))
+        
 
 
         // ws.send(JSON.stringify({

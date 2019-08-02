@@ -20,7 +20,7 @@
           <el-button round type="danger" @click="exitHome">退出</el-button>
         </div>
         <ul>
-          <li class="member" v-for="(item, index) in this.homes[this.homes.map(e=>e.homeName).indexOf(this.currentHome)].members" :key="index">
+          <li class="member" v-for="(item, index) in this.homes[this.currentHomeIndex].members" :key="index">
             <div class="self" v-if="item == ip">自己：{{ item }}</div>
             <div v-else>用户{{ index + 1 }}：{{ item }}</div>
           </li>
