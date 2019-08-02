@@ -95,9 +95,8 @@ class Internet{
                     let memberIndex = that.homes[that.currentHomeIndex].members.indexOf(obj.ip)
                     if(memberIndex !== -1){
                         that.homes[that.currentHomeIndex].members.splice(memberIndex,1)
-                        console.log(that.homes[that.currentHomeIndex].members)
-                        // let members = that.homes[that.currentHomeIndex].members
-                        // that.homes[that.currentHomeIndex].members = members
+                        let home = that.homes[that.currentHomeIndex]
+                        that.$set(that.homes, that.currentHomeIndex, home)
                         that.pens[obj.ip] = null
                     }
                 }
