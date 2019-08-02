@@ -1,13 +1,14 @@
 const ws = require('nodejs-websocket')
 
-let homes = [{
-    homeName: 'home1',
-    members: ['192.168.1.196'],
-    currentDraw: []
-}]
-// let homes = []
+// let homes = [{
+//     homeName: 'home1',
+//     members: ['192.168.1.196'],
+//     currentDraw: []
+// }]
+let homes = []
 let users = {}
-let homeNames = ['home1']
+// let homeNames = ['home1']
+let homeNames = []
 
 let server = ws.createServer(conn=>{
     conn
@@ -31,7 +32,7 @@ let server = ws.createServer(conn=>{
                     }
                 }))
                 for(let key in users){
-                    if(key !== 'obj.ip'){
+                    if(key !== obj.ip){
                         users[key].sendText(JSON.stringify({
                             status: 'addHome',
                             homeName: obj.homeName
