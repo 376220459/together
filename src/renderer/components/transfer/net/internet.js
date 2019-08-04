@@ -4,7 +4,9 @@ class Internet{
         that = context
     }
     openInternet(){
-        ws = new WebSocket(`ws://192.168.1.196:8888`)
+        ws = new WebSocket(`ws://39.96.23.138:8668`)
+        // ws = new WebSocket(`ws://192.168.1.7:8888`)
+        // ws = new WebSocket(`ws://192.168.1.196:8888`)
         // ws = new WebSocket('ws://huaban.com')
         ws.onmessage = e=>{
             let obj = JSON.parse(e.data)
@@ -238,7 +240,7 @@ class Internet{
                 that.$message({
                     type: 'erorr',
                     message: '进入失败，请稍后再试',
-                    duration: 1000
+                    duration: 5000
                 })
             }
         }, 5000);

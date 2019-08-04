@@ -281,12 +281,12 @@ class Transfer{
     start(e){
         that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
         that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
-        
+
         if(that.mark){
             that.currentImageData = that.ctx.getImageData(0,0,canvas.width,canvas.height)
             that.markpen = canvas.getContext('2d')
-            that.markpen.strokeStyle = '#FF00FF'
             that.markpen.lineWidth = 5
+            that.markpen.strokeStyle = '#FF00FF'
 			that.markpen.beginPath()
             that.markpen.moveTo(that.x,that.y)
             that.markPoints[0] = [that.x,that.y]
@@ -303,6 +303,13 @@ class Transfer{
 
             return
         }
+        
+        // if(that.color === 'white'){
+        //     that.ctx.lineWidth = 15
+        // }else{
+        //     that.ctx.lineWidth = 1
+        // }
+        // that.ctx.strokeStyle = that.color
 
         that.path = new Path2D()
         that.path.moveTo(that.x,that.y)
@@ -319,6 +326,13 @@ class Transfer{
         that.currentLine.y2 = that.y
     }
     otherStart(e){
+        // if(e.color === 'white'){
+        //     that.pens[e.ip].ctx.lineWidth = 15
+        // }else{
+        //     that.pens[e.ip].ctx.lineWidth = 1
+        // }
+        // that.pens[e.ip].ctx.strokeStyle = e.color
+
         that.pens[e.ip].path = new Path2D()
         that.pens[e.ip].path.moveTo(e.clientX,e.clientY)
         that.pens[e.ip].tag = true
@@ -329,9 +343,10 @@ class Transfer{
 
         if(that.mark && that.markpen){
             if(that.tag){
-                that.markpen .lineTo(that.x,that.y)
-                that.markpen .stroke()
-
+                that.markpen.lineWidth = 5
+                that.markpen.strokeStyle = '#FF00FF'
+                that.markpen.lineTo(that.x,that.y)
+                that.markpen.stroke()
 
                 that.markLine.points.push([that.x,that.y])
                 if(that.x < that.markLine.x1)   that.markLine.x1 = that.x
@@ -350,6 +365,7 @@ class Transfer{
                 that.ctx.lineWidth = 1
             }
             that.ctx.strokeStyle = that.color
+
             that.path.lineTo(that.x,that.y)
             that.ctx.stroke(that.path)
 

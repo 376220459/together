@@ -45,25 +45,8 @@ let server = ws.createServer(conn=>{
                     canCreate: false
                 }))
             }
-            if(homes.map(e=>e.homeName).indexOf(obj.homeName) === -1){
-                homes.push({
-                    homeName: obj.homeName,
-                    members: [obj.ip],
-                    currentDraw: []
-                })
-                conn.sendText(JSON.stringify({
-                    status: 'createHome',
-                    homes: homes
-                }));
-                server.connections.forEach(conn=>{
-                    if(obj.ip !== conn.path.slice(5)){
-                        conn.sendText(JSON.stringify({
-                            status: 'getHomes',
-                            homes: homes
-                        }));
-                    }
-                });
-            }
+
+
             // if(homes.map(e=>e.homeName).indexOf(obj.homeName) === -1){
             //     homes.push({
             //         homeName: obj.homeName,
@@ -157,11 +140,8 @@ let server = ws.createServer(conn=>{
                     }));
                 })
             }else{
-                homes.splice(homeIndex,1)
-                let homeNameIndex = homeNames.indexOf(obj.homeName)
-                if(homeNameIndex !== -1){
-                    homeNames.splice(homeNameIndex,1)
-                }
+                homes.splice(homeIndex,1)// server端删除此房
+                homeNames = homes.map(e=>e.homeName)// server端删除此房
                 for(let key in users){
                     users[key].sendText(JSON.stringify({
                         status: 'deleteHome',
