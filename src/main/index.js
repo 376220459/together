@@ -101,7 +101,8 @@ function openLocalnet(){
       }else if(msg.status == 'otherStop'){
         me.send('notice-vice', {
           status: 'otherStop',
-          e: msg.e
+          e: msg.e,
+          currentLine: msg.currentLine
         })
       }else if(msg.status == 'getHomes'){
         server.send(JSON.stringify({
@@ -241,6 +242,33 @@ function openLocalnet(){
             homeName: msg.homeName
           })
         }
+      }else if(msg.status == 'sync-addLine'){
+        if(rinfo.address !== IPAddress){
+          let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
+          if(homeIndex === -1){
+            return
+          }
+          homes[homeIndex].currentDraw.push(msg.currentLine)
+        }
+      }else if(msg.status == 'sync-deleteLines'){
+        if(rinfo.address !== IPAddress){
+          let homeIndex = homes.map(e=>e.homeName).indexOf(msg.homeName)
+          if(homeIndex === -1){
+              return
+          }
+          msg.deleteLines.forEach(e=>{
+              let lineIndex = homes[homeIndex].currentDraw.map(e=>JSON.stringify(e)).indexOf(JSON.stringify(e))
+              if(lineIndex !== -1){
+                  homes[homeIndex].currentDraw.splice(lineIndex,1)
+              }
+          })
+        }
+      }else if(msg.status == 'deleteLines'){
+        me.send('notice-vice', {
+          status: 'deleteLines',
+          homeName: msg.homeName,
+          currentLines: msg.currentLines
+        })
       }
   })
 
@@ -281,25 +309,49 @@ ipc.on('notice-main',(event, arg)=>{
       return
     }
     homes[homeIndex].currentDraw.push(arg.currentLine)
-    
-    homes[homeIndex].members.forEach(e=>{
-      server.send(JSON.stringify({
-        status: 'updateCurrentDraw',
-        currentDraw: homes[homeIndex].currentDraw,
-        homeName: arg.homeName
-      }),'8066',e)
 
+    server.send(JSON.stringify({
+      status: 'sync-addLine',
+      currentLine: arg.currentLine,
+      homeName: arg.homeName
+    }),'8066',multicastAddr)
+
+    homes[homeIndex].members.forEach(e=>{
       if(e !== IPAddress){
         server.send(JSON.stringify({
           status: 'otherStop',
-          e: arg.e
+          e: arg.e,
+          currentLine: arg.currentLine
         }),'8066',e)
       }
     })
-    server.send(JSON.stringify({
-      status: 'updateHomes',
-      homes: homes
-    }),'8066',multicastAddr)
+
+
+
+    // let homeIndex = homes.map(e=>e.homeName).indexOf(arg.homeName)
+    // if(homeIndex === -1){
+    //   return
+    // }
+    // homes[homeIndex].currentDraw.push(arg.currentLine)
+    
+    // homes[homeIndex].members.forEach(e=>{
+    //   server.send(JSON.stringify({
+    //     status: 'updateCurrentDraw',
+    //     currentDraw: homes[homeIndex].currentDraw,
+    //     homeName: arg.homeName
+    //   }),'8066',e)
+
+    //   if(e !== IPAddress){
+    //     server.send(JSON.stringify({
+    //       status: 'otherStop',
+    //       e: arg.e
+    //     }),'8066',e)
+    //   }
+    // })
+    // server.send(JSON.stringify({
+    //   status: 'updateHomes',
+    //   homes: homes
+    // }),'8066',multicastAddr)
   }else if(arg.status == 'getIP'){
     me = event.sender
     me.send('notice-ip', {
@@ -524,12 +576,19 @@ ipc.on('notice-main',(event, arg)=>{
             homes[homeIndex].currentDraw.splice(lineIndex,1)
         }
     })
+
+    server.send(JSON.stringify({
+      status: 'sync-deleteLines',
+      homeName: arg.homeName,
+      deleteLines: arg.deleteLines
+    }),'8066',multicastAddr)
+
     homes[homeIndex].members.forEach(e=>{
       if(e !== IPAddress){
         server.send(JSON.stringify({
-          status: 'updateCurrentDraw',
-          currentDraw: homes[homeIndex].currentDraw,
-          deleteLine: true
+          status: 'deleteLines',
+          homeName: arg.homeName,
+          deleteLines: arg.deleteLines
         }),'8066',e)
       }
     })

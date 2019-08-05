@@ -18,6 +18,7 @@ class Localnet{
                 that.otherDrawing(arg.e)
             }else if(arg.status == 'otherStop'){
                 that.otherStop(arg.e)
+                that.homes[that.currentHomeIndex].currentDraw.push(arg.currentLine)
             }else if(arg.status == 'getHomes'){
                 if(that.loading){
                     that.loading = false
@@ -86,7 +87,7 @@ class Localnet{
                     that.homes[that.currentHomeIndex].currentDraw = arg.currentDraw
                     if(arg.deleteLine){
                         let canvas = document.getElementById('canvas')
-                        if(that.currentHome === obj.homeName){
+                        if(that.currentHome === arg.homeName){
                             //本地重绘
                             that.ctx.clearRect(0,0,canvas.width,canvas.height)
                             that.homes[that.currentHomeIndex].currentDraw.forEach(e=>{
@@ -164,6 +165,38 @@ class Localnet{
                 let homeIndex = that.homes.map(e=>e.homeName).indexOf(arg.homeName)
                 if(homeIndex !== -1){
                     that.homes.splice(homeIndex,1)
+                }
+            }else if(arg.status == 'deleteLines'){
+                let canvas = document.getElementById('canvas')
+                if(that.currentHome === arg.homeName){
+                    //本地删除
+                    arg.deleteLines.forEach(e=>{
+                        let lineIndex = that.homes[that.currentHomeIndex].currentDraw.map(e=>JSON.stringify(e)).indexOf(JSON.stringify(e))
+                        if(lineIndex !== -1){
+                            that.homes[that.currentHomeIndex].currentDraw.splice(lineIndex,1)
+                        }
+                    })
+
+                    //本地重绘
+                    that.ctx.clearRect(0,0,canvas.width,canvas.height)
+                    that.homes[that.currentHomeIndex].currentDraw.forEach(e=>{
+                        let ctx = canvas.getContext("2d")
+                        let path = new Path2D()
+                        ctx.strokeStyle = e.color
+                        if(e.color === 'white'){
+                            ctx.lineWidth = 15
+                        }else{
+                            ctx.lineWidth = 1
+                        }
+                        e.points.forEach((item,index)=>{
+                            if(index == 0){
+                                path.moveTo(item[0],item[1])
+                            }else{
+                                path.lineTo(item[0],item[1])
+                                ctx.stroke(path)
+                            }
+                        })
+                    })
                 }
             }
         })
@@ -300,9 +333,25 @@ class Localnet{
                 },
                 currentLine: that.currentLine
             })
+            that.homes[that.currentHomeIndex].currentDraw.push(that.currentLine)
             that.currentLine = null
         }
     }
+    // sendStop(){
+    //     if(that.currentLine && that.currentLine.points.length > 1){
+    //         that.ipc.send('notice-main', {
+    //             status: 'sendStop',
+    //             homeName: that.currentHome,
+    //             ip: that.ip,
+    //             e: {
+    //                 ip: that.ip
+    //             },
+    //             currentLine: that.currentLine
+    //         })
+    //         // that.homes[that.currentHomeIndex].currentDraw.push(that.currentLine)
+    //         that.currentLine = null
+    //     }
+    // }
     checkDelete(){
         let canvas = document.getElementById('canvas')
         that.ctx.putImageData(that.currentImageData,0,0);
