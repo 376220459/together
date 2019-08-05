@@ -3,6 +3,7 @@ import {Internet} from './net/internet'
 let localnet = new Localnet(),
     internet = new Internet()
 let that,canvas,canvasDiv
+let otherDrawingArr = []
 
 class Transfer{
     init(context){
@@ -198,6 +199,7 @@ class Transfer{
     }
     openDraw(){
         if(that.drawShow == 'none'){
+            this.delayDrawing()
             that.drawShow = 'block'
             setTimeout(() => {
                 canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
@@ -377,16 +379,26 @@ class Transfer{
         }
     }
     otherDrawing(e){
-        if(that.pens[e.ip].tag){
-            if(e.color === 'white'){
-                that.pens[e.ip].ctx.lineWidth = 15
-            }else{
-                that.pens[e.ip].ctx.lineWidth = 1
+        otherDrawingArr.push(e)
+    }
+    delayDrawing(){
+        function drawing(){
+            while(otherDrawingArr.length){
+                let e = otherDrawingArr.shift()
+                if(that.pens[e.ip].tag){
+                    if(e.color === 'white'){
+                        that.pens[e.ip].ctx.lineWidth = 15
+                    }else{
+                        that.pens[e.ip].ctx.lineWidth = 1
+                    }
+                    that.pens[e.ip].ctx.strokeStyle = e.color
+                    that.pens[e.ip].path.lineTo(e.clientX,e.clientY)
+                    that.pens[e.ip].ctx.stroke(that.pens[e.ip].path)
+                }
             }
-            that.pens[e.ip].ctx.strokeStyle = e.color
-            that.pens[e.ip].path.lineTo(e.clientX,e.clientY)
-            that.pens[e.ip].ctx.stroke(that.pens[e.ip].path)
+            window.requestAnimationFrame(drawing)
         }
+        window.requestAnimationFrame(drawing)
     }
     stop(e){
         if(e){
