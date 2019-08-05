@@ -172,12 +172,13 @@ class Localnet{
                 if(that.currentHome === arg.homeName){
                     //本地删除
                     arg.deleteLines.forEach(e=>{
-                        let lineIndex = that.homes[that.currentHomeIndex].currentDraw.map(e=>JSON.stringify(e)).indexOf(JSON.stringify(e))
+                        let lineIndex = that.homes[that.currentHomeIndex].currentDraw.map(e=>JSON.stringify(e.points)).indexOf(JSON.stringify(e.points))
                         if(lineIndex !== -1){
                             that.homes[that.currentHomeIndex].currentDraw.splice(lineIndex,1)
                         }
                     })
-
+                    
+                    // console.log(that.homes[that.currentHomeIndex].currentDraw)
                     //本地重绘
                     that.ctx.clearRect(0,0,canvas.width,canvas.height)
                     that.homes[that.currentHomeIndex].currentDraw.forEach(e=>{
