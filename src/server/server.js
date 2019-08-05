@@ -1,13 +1,7 @@
 const ws = require('nodejs-websocket')
 
-// let homes = [{
-//     homeName: 'home1',
-//     members: ['192.168.1.196'],
-//     currentDraw: []
-// }]
 let homes = []
 let users = {}
-// let homeNames = ['home1']
 let homeNames = []
 
 let server = ws.createServer(conn=>{
@@ -45,37 +39,11 @@ let server = ws.createServer(conn=>{
                     canCreate: false
                 }))
             }
-
-
-            // if(homes.map(e=>e.homeName).indexOf(obj.homeName) === -1){
-            //     homes.push({
-            //         homeName: obj.homeName,
-            //         members: [obj.ip],
-            //         currentDraw: []
-            //     })
-            //     conn.sendText(JSON.stringify({
-            //         status: 'createHome',
-            //         homes: homes
-            //     }));
-            //     server.connections.forEach(conn=>{
-            //         if(obj.ip !== conn.path.slice(5)){
-            //             conn.sendText(JSON.stringify({
-            //                 status: 'getHomes',
-            //                 homes: homes
-            //             }));
-            //         }
-            //     });
-            // }
         }else if(obj.status == 'getHomes'){
             conn.sendText(JSON.stringify({
                 status: 'getHomes',
                 homeNames: homeNames
             }));
-
-            // conn.sendText(JSON.stringify({
-            //     status: 'getHomes',
-            //     homes: homes
-            // }));
         }else if(obj.status == 'connect'){
             users[obj.ip] = conn
         }else if(obj.status == 'enterHome'){
@@ -99,27 +67,6 @@ let server = ws.createServer(conn=>{
                     }));
                 }
             }
-
-
-            // let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
-            // if(homeIndex === -1){
-            //     return
-            // }
-            // if(homes[homeIndex].members.indexOf(obj.ip) === -1){
-            //     homes[homeIndex].members.push(obj.ip)
-            //     homes[homeIndex].members = [...new Set(homes[homeIndex].members)]
-            //     server.connections.forEach(conn=>{
-            //         conn.sendText(JSON.stringify({
-            //             status: 'getHomes',
-            //             homes: homes
-            //         }));
-            //     })
-                
-            //     users[obj.ip].sendText(JSON.stringify({
-            //         status: 'enterHome',
-            //         homes: homes
-            //     }));
-            // }
         }else if(obj.status == 'exitHome'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
             if(homeIndex === -1){
@@ -149,26 +96,6 @@ let server = ws.createServer(conn=>{
                     }));
                 }
             }
-
-
-
-            // let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
-            // if(homeIndex === -1){
-            //     return
-            // }
-            // let memberIndex = homes[homeIndex].members.indexOf(obj.ip)
-            // if(memberIndex !== -1){
-            //     homes[homeIndex].members.splice(memberIndex,1)
-            //     if(!homes[homeIndex].members.length){
-            //         homes.splice(homeIndex,1)
-            //     }
-            //     server.connections.forEach(conn=>{
-            //         conn.sendText(JSON.stringify({
-            //             status: 'getHomes',
-            //             homes: homes
-            //         }));
-            //     })
-            // }
         }else if(obj.status == 'sendStart'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
             if(homeIndex === -1){
@@ -210,25 +137,6 @@ let server = ws.createServer(conn=>{
                     }));
                 }
             })
-            // let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
-            // if(homeIndex === -1){
-            //     return
-            // }
-            // homes[homeIndex].currentDraw.push(obj.currentLine)
-            // homes[homeIndex].members.forEach(e=>{
-            //     users[e].sendText(JSON.stringify({
-            //         status: 'updateCurrentDraw',
-            //         currentDraw: homes[homeIndex].currentDraw
-            //     }));
-            // })
-            // homes[homeIndex].members.forEach(e=>{
-            //     if(e !== obj.ip){
-            //         users[e].sendText(JSON.stringify({
-            //             status: 'otherStop',
-            //             e: obj.e
-            //         }));
-            //     }
-            // })
         }else if(obj.status == 'deleteLines'){
             let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
             if(homeIndex === -1){
@@ -250,24 +158,6 @@ let server = ws.createServer(conn=>{
                 }
             })
         }
-        // }else if(obj.status == 'deleteLine'){
-        //     let homeIndex = homes.map(e=>e.homeName).indexOf(obj.homeName)
-        //     if(homeIndex === -1){
-        //         return
-        //     }
-        //     let lineIndex = homes[homeIndex].currentDraw.map(e=>JSON.stringify(e)).indexOf(JSON.stringify(obj.line))
-        //     if(lineIndex === -1){
-        //         return
-        //     }
-        //     homes[homeIndex].currentDraw.splice(lineIndex,1)
-        //     homes[homeIndex].members.forEach(e=>{
-        //         users[e].sendText(JSON.stringify({
-        //             status: 'updateCurrentDraw',
-        //             currentDraw: homes[homeIndex].currentDraw,
-        //             deleteLine: true
-        //         }));
-        //     })
-        // }
     })
     .on('close',()=>{
         console.log('连接已关闭')

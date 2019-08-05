@@ -45,7 +45,7 @@
         <el-button class="get-button" @click="getHomes" type="primary" round plain>刷新内网房间列表</el-button>
         <ul v-if="homes.length ? true :false">
           <li class="home-item" v-for="(item, index) in homes" :key="index">
-            <div style="cursor: pointer;">|~|房间{{ index + 1 }}：{{ item.homeName }}</div>
+            <div style="cursor: pointer;"><i class="iconfont icon-home"></i> 房间{{ index + 1 }}：{{ item.homeName }}</div>
             <el-button round type="success" @click="enterHome(item.homeName)">进入</el-button>
           </li>
         </ul>
@@ -60,8 +60,8 @@
           <div @click="changeColor('#909399',2)" class="gray pen" :style=toolStyle[2]></div>
           <div @click="changeColor('#E6A23C',3)" class="orange pen" :style=toolStyle[3]></div>
           <div @click="changeColor('black',4)" class="black pen" :style=toolStyle[4]></div>
-          <div @click="selectRubber" class="rubber" :style=toolStyle[5]><i class="iconfont icon-xiangpi"></i></div>
-          <div @click="selectMark" class="mark" :style=toolStyle[6]><i class="iconfont icon-masaike"></i></div>
+          <div @click="selectRubber" class="rubber" :style=toolStyle[5] title="橡皮擦"><i class="iconfont icon-xiangpi"></i></div>
+          <div @click="selectMark" class="mark" :style=toolStyle[6] title="选择删除"><i class="iconfont icon-masaike"></i></div>
         </div>
       </div>
     </main>
@@ -120,74 +120,96 @@ export default {
     selectNet(net){
       transfer.selectNet(net)
     },
+
     getHomes(){
       transfer.getHomes()
     },
+
     changeNet(){
       transfer.changeNet()
     },
+    
     createHome(){
       transfer.createHome()
     },
+
     enterHome(item){
       transfer.enterHome(item)
     },
+
     exitHome(){
       transfer.exitHome()
     },
+
     openDraw(){
       transfer.openDraw()
     },
+
     initPen(){
       transfer.initPen()
     },
+
     changeColor(color,index){
       transfer.changeColor(color,index)
     },
+
     selectRubber(){
       transfer.selectRubber()
     },
+
     selectMark(){
       transfer.selectMark()
     },
+
     start(e){
       transfer.start(e)
     },
+
     otherStart(e){
       transfer.otherStart(e)
     },
+    
     drawing(e){
       transfer.drawing(e)
     },
+
     otherDrawing(e){
       transfer.otherDrawing(e)
     },
+
     stop(e){
       transfer.stop(e)
     },
+
     otherStop(e){
       transfer.otherStop(e)
     },
+
     sendStart(e){
       transfer.sendStart(e)
     },
+
     sendDrawing(e){
       transfer.sendDrawing(e)
     },
+
     sendStop(){
       transfer.sendStop()
     },
+
     exitDraw(){
       transfer.exitDraw()
     },
+
     openCreateHome(){
       transfer.openCreateHome()
     },
+
     closeCreateHome(){
       transfer.closeCreateHome()
     }
   },
-  mounted() {
+  mounted() { //页面挂载后进行初始化
     transfer.init(this)
   }
 }
@@ -299,9 +321,10 @@ export default {
         .home-item{
           position: relative;
           display: flex;
-          justify-content: space-around;
+          justify-content: space-between;
           align-items: center;
           margin: 15px 0;
+          padding: 0 10px;
           color: #67C23A;
         }
       }

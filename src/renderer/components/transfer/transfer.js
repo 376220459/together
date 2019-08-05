@@ -3,17 +3,16 @@ import {Internet} from './net/internet'
 let localnet = new Localnet(),
     internet = new Internet()
 let that,canvas,canvasDiv
-let otherDrawingArr = []
 
 class Transfer{
-    init(context){
+    init(context){  //初始化
         canvas = document.getElementById('canvas')
         canvasDiv = document.getElementById('canvasDiv')
         that = context
         if(!that.ip){
-            that.loading = true
+            that.loading = true //防止网络慢，限制用户操作
         }
-        that.ipc = require('electron').ipcRenderer
+        that.ipc = require('electron').ipcRenderer  //ipc模块用于主进程和渲染进程通讯
         that.ipc.send('notice-main', {
             status: 'getIP'
         })
@@ -26,15 +25,15 @@ class Transfer{
             }
         })
         that.ipc.on('notice-close', (event, arg)=>{
-            if(arg.status == 'closeWindow'){
+            if(arg.status == 'closeWindow' && that.currentHome){
                 that.exitHome()
             }
         })
         
-        localnet.init(that)
-        internet.init(that)
+        localnet.init(that) //初始化局域网
+        internet.init(that) //初始化公网
 
-        function debounce(func,wait){
+        function debounce(func,wait){   //防抖函数，用于用户缩放页面改变画布大小
             let id = null;
             return function(){
                 let args = arguments;
@@ -54,12 +53,15 @@ class Transfer{
             }
         },100),false)
     }
-    openInternet(){
+
+    openInternet(){ //打开公网
         internet.openInternet(that)
     }
-    openLocalnet(){
+
+    openLocalnet(){ //打开局域网
         localnet.openLocalnet(that)
     }
+
     selectNet(net){
         if(net === 'internet'){
             that.internet = true
@@ -69,28 +71,35 @@ class Transfer{
             this.openLocalnet()
         }
     }
-    changeNet(){
-        if(that.internet){
-            that.internet = false
-            that.localnet = true
 
-            internet.close()
-            this.openLocalnet()
-        }else{
-            that.localnet = false
-            that.internet = true
-            that.ipc.removeAllListeners('notice-vice')
-            this.openInternet()
-        }
-        that.homes = []
+    changeNet(){    //切换网络
+        that.loading = true
+        setTimeout(() => {  //防止网络太慢，限制用户操作
+            if(that.internet){
+                that.internet = false
+                that.localnet = true
+    
+                internet.close()
+                this.openLocalnet()
+            }else{
+                that.localnet = false
+                that.internet = true
+                that.ipc.removeAllListeners('notice-vice')
+                this.openInternet()
+            }
+            that.homes = []
+            that.loading = false
+        }, 1000);
     }
-    getHomes(){
+
+    getHomes(){ //获取房间列表
         if(that.internet){
             internet.getHomes()
         }else{
             localnet.getHomes()
         }
     }
+
     createHome(){
         that.newHomeName = that.newHomeName.trim()
         if(that.newHomeName == ''){
@@ -106,17 +115,8 @@ class Transfer{
         }else{
             localnet.createHome()
         }
-        // that.newHomeName = that.newHomeName.trim()
-        // if(that.newHomeName == '' || that.homes.map(e=>e.homeName).indexOf(that.newHomeName) !== -1){
-        //     that.$message.error('创建失败，换个名字试试')
-        //     return
-        // }
-        // if(that.internet){ 
-        //     internet.createHome()
-        // }else{
-        //     localnet.createHome()
-        // }
     }
+
     enterHome(item){
         if(that.internet){
             internet.enterHome(item)
@@ -124,6 +124,7 @@ class Transfer{
             localnet.enterHome(item)
         }
     }
+
     exitHome(){
         if(that.internet){
             internet.exitHome()
@@ -133,7 +134,8 @@ class Transfer{
         that.currentHome = ''
         that.exitDraw()
     }
-    changeColor(color,index){
+
+    changeColor(color,index){   //改变画笔颜色
         if(that.rubber){
             that.rubber = false
         }
@@ -143,10 +145,10 @@ class Transfer{
         that.color = color
         that.ctx.lineWidth = 1
         that.toolStyle = []
-        // that.toolStyle[index] = `background:white;border:7px solid ${color};`
         that.toolStyle[index] = 'box-shadow:aqua 0px 0px 30px 10px'
     }
-    selectRubber(){
+
+    selectRubber(){ //普通橡皮擦
         if(that.mark){
             that.mark = false
         }
@@ -158,25 +160,21 @@ class Transfer{
             that.toolStyle[5] = `border: 1.5px dotted skyblue;`
         }
     }
-    selectMark(){
+
+    selectMark(){   //选择擦除
         if(that.rubber){
             that.rubber = false
         }
-        // that.color = 'white'
         if(!that.mark){
             that.mark = true
             that.toolStyle = []
             that.toolStyle[6] = `border: 1.5px dotted skyblue;`
         }
     }
-    exitDraw(){
-        that.drawShow = 'none'
-        that.color = 'black'
-        that.mark = false
-        that.toolStyle = [,,,,'box-shadow:aqua 0px 0px 30px 10px']
-    }
-    initPen(){
-        // let that.currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
+
+    
+
+    initPen(){  //初始化房内用户的画笔
         if(that.currentHome){
             if(that.currentHomeIndex === -1){
                 return
@@ -189,17 +187,12 @@ class Transfer{
                     that.pens[e].path = new Path2D()
                     that.pens[e].tag = false
                 }
-                // that.pens[e] = {}
-                // that.pens[e].ctx = canvas.getContext("2d")
-                // that.pens[e].ctx.lineWidth = 1
-                // that.pens[e].path = new Path2D()
-                // that.pens[e].tag = false
             })
         }
     }
-    openDraw(){
+
+    openDraw(){ //打开画布
         if(that.drawShow == 'none'){
-            this.delayDrawing()
             that.drawShow = 'block'
             setTimeout(() => {
                 canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
@@ -240,47 +233,16 @@ class Transfer{
                 }, 0)
             }
         }
-        // if(that.drawShow == 'none'){
-        //     that.loading = true
-        //     setTimeout(() => {
-        //         that.loading = false
-        //     }, 1000);
-        //     that.drawShow = 'block'
-        //     setTimeout(() => {
-        //         canvas.width = canvasDiv.offsetWidth > 50 ? canvasDiv.offsetWidth - 50 : canvasDiv.offsetWidth
-        //         canvas.height = canvasDiv.offsetHeight > 100 ? canvasDiv.offsetHeight - 100 : canvasDiv.offsetHeight
-        //     }, 0);
-        //     that.ctx = canvas.getContext("2d") 
-        //     that.ctx.lineWidth = 1
-        //     that.initPen()
-
-        //     let that.currentHomeIndex = that.homes.map(e=>e.homeName).indexOf(that.currentHome)
-        //     if(that.homes[that.currentHomeIndex].currentDraw){
-        //         setTimeout(() => {
-        //             that.homes[that.currentHomeIndex].currentDraw.forEach(e=>{
-        //                 let ctx = canvas.getContext("2d")
-        //                 let path = new Path2D()
-        //                 ctx.strokeStyle = e.color
-        //                 if(e.color === 'white'){
-        //                     ctx.lineWidth = 15
-        //                 }else{
-        //                     ctx.lineWidth = 1
-        //                 }
-        //                 e.points.forEach((item,index)=>{
-        //                     if(index == 0){
-        //                         path.moveTo(item[0],item[1])
-        //                     }else{
-                                
-        //                         path.lineTo(item[0],item[1])
-        //                         ctx.stroke(path)
-        //                     }
-        //                 })
-        //             })
-        //         }, 100);
-        //     }
-        // }
     }
-    start(e){
+
+    exitDraw(){ //退出画布
+        that.drawShow = 'none'
+        that.color = 'black'
+        that.mark = false
+        that.toolStyle = [,,,,'box-shadow:aqua 0px 0px 30px 10px']
+    }
+
+    start(e){   //自己画-开始
         that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
         that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
 
@@ -305,13 +267,6 @@ class Transfer{
 
             return
         }
-        
-        // if(that.color === 'white'){
-        //     that.ctx.lineWidth = 15
-        // }else{
-        //     that.ctx.lineWidth = 1
-        // }
-        // that.ctx.strokeStyle = that.color
 
         that.path = new Path2D()
         that.path.moveTo(that.x,that.y)
@@ -327,19 +282,14 @@ class Transfer{
         that.currentLine.x2 = that.x
         that.currentLine.y2 = that.y
     }
-    otherStart(e){
-        // if(e.color === 'white'){
-        //     that.pens[e.ip].ctx.lineWidth = 15
-        // }else{
-        //     that.pens[e.ip].ctx.lineWidth = 1
-        // }
-        // that.pens[e.ip].ctx.strokeStyle = e.color
 
+    otherStart(e){   //别人画-开始
         that.pens[e.ip].path = new Path2D()
         that.pens[e.ip].path.moveTo(e.clientX,e.clientY)
         that.pens[e.ip].tag = true
     }
-    drawing(e){
+
+    drawing(e){   //自己画-过程
         that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
         that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
 
@@ -378,29 +328,22 @@ class Transfer{
             if(that.y > that.currentLine.y2)   that.currentLine.y2 = that.y
         }
     }
-    otherDrawing(e){
+
+    otherDrawing(e){   //别人画-过程
         otherDrawingArr.push(e)
-    }
-    delayDrawing(){
-        function drawing(){
-            while(otherDrawingArr.length){
-                let e = otherDrawingArr.shift()
-                if(that.pens[e.ip].tag){
-                    if(e.color === 'white'){
-                        that.pens[e.ip].ctx.lineWidth = 15
-                    }else{
-                        that.pens[e.ip].ctx.lineWidth = 1
-                    }
-                    that.pens[e.ip].ctx.strokeStyle = e.color
-                    that.pens[e.ip].path.lineTo(e.clientX,e.clientY)
-                    that.pens[e.ip].ctx.stroke(that.pens[e.ip].path)
-                }
+        if(that.pens[e.ip].tag){
+            if(e.color === 'white'){
+                that.pens[e.ip].ctx.lineWidth = 15
+            }else{
+                that.pens[e.ip].ctx.lineWidth = 1
             }
-            window.requestAnimationFrame(drawing)
+            that.pens[e.ip].ctx.strokeStyle = e.color
+            that.pens[e.ip].path.lineTo(e.clientX,e.clientY)
+            that.pens[e.ip].ctx.stroke(that.pens[e.ip].path)
         }
-        window.requestAnimationFrame(drawing)
     }
-    stop(e){
+
+    stop(e){   //自己画-结束
         if(e){
             that.x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25
             that.y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50
@@ -416,10 +359,12 @@ class Transfer{
         }
         that.tag = false
     }
-    otherStop(e){
+    
+    otherStop(e){   //别人画-结束
         that.pens[e.ip].tag = false
     }
-    sendStart(e){
+
+    sendStart(e){  //发送开始画信号
         if(that.mark){
             return
         }
@@ -431,7 +376,8 @@ class Transfer{
             localnet.sendStart(x,y)
         }
     }
-    sendDrawing(e){
+
+    sendDrawing(e){  //发送正在画信号
         if(that.mark){
             return
         }
@@ -445,7 +391,8 @@ class Transfer{
             }
         }
     }
-    sendStop(){
+    
+    sendStop(){  //发送结束画信号
         if(that.mark){
             return
         }
@@ -455,10 +402,12 @@ class Transfer{
             localnet.sendStop()
         }
     }
-    openCreateHome(){
+    
+    openCreateHome(){   //打开创建房间页面
         that.createHomeIf = true
     }
-    closeCreateHome(){
+
+    closeCreateHome(){   //关闭创建房间页面
         that.createHomeIf = false
         that.newHomeName = ''
     }
