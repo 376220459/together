@@ -330,7 +330,6 @@ class Transfer{
     }
 
     otherDrawing(e){   //别人画-过程
-        otherDrawingArr.push(e)
         if(that.pens[e.ip].tag){
             if(e.color === 'white'){
                 that.pens[e.ip].ctx.lineWidth = 15
