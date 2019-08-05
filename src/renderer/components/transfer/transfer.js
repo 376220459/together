@@ -437,10 +437,12 @@ class Transfer{
         }
         let x = document.documentElement.scrollLeft + e.clientX - canvasDiv.offsetLeft - 25;
         let y = document.documentElement.scrollTop + e.clientY - canvasDiv.offsetTop - 50;
-        if(that.internet){
-            internet.sendDrawing(x,y)
-        }else{
-            localnet.sendDrawing(x,y)
+        if(that.tag){
+            if(that.internet){
+                internet.sendDrawing(x,y)
+            }else{
+                localnet.sendDrawing(x,y)
+            }
         }
     }
     sendStop(){
