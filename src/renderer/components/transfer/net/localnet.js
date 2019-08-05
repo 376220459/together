@@ -23,14 +23,15 @@ class Localnet{
                 if(that.loading){
                     that.loading = false
                 }
-                that.homes = []
-                arg.homeNames.forEach(e=>{
-                    that.homes.push({
-                        homeName: e,
-                        members: [],
-                        currentDraw: []
-                    })
-                })
+                that.homes = arg.homes
+                // that.homes = []
+                // arg.homeNames.forEach(e=>{
+                //     that.homes.push({
+                //         homeName: e,
+                //         members: [],
+                //         currentDraw: []
+                //     })
+                // })
                 that.$message({
                     type: 'success',
                     message: '房间列表已刷新',
@@ -202,7 +203,7 @@ class Localnet{
         })
     }
     getHomes(){
-        that.loading = true
+        // that.loading = true
         that.ipc.send('notice-main', {
             status: 'getHomes'
         })

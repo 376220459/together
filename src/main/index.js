@@ -105,18 +105,28 @@ function openLocalnet(){
           currentLine: msg.currentLine
         })
       }else if(msg.status == 'getHomes'){
-        server.send(JSON.stringify({
-          status: 'giveHomes',
-          homes: homes
-        }),'8066',rinfo.address);
-      }else if(msg.status == 'giveHomes'){
-        if(msg.homes){
-          homes = msg.homes
-          me.send('notice-vice', {
-            status: 'updateHomes',
-            homes: homes
-          })
+        if(rinfo.address !== IPAddress){
+          if(homes.length){
+            server.send(JSON.stringify({
+              status: 'giveHomes',
+              homes: homes
+            }),'8066',rinfo.address);
+          }
         }
+      }else if(msg.status == 'giveHomes'){
+        homes = msg.homes
+        homeNames = homes.map(e=>e.homeName)
+        me.send('notice-vice', {
+          status: 'getHomes',
+          homes: homes
+        })
+        // if(msg.homes){
+        //   homes = msg.homes
+        //   me.send('notice-vice', {
+        //     status: 'updateHomes',
+        //     homes: homes
+        //   })
+        // }
       }else if(msg.status == 'createHome'){
         if(rinfo.address == IPAddress){
           currentHome = msg.home
@@ -361,10 +371,14 @@ ipc.on('notice-main',(event, arg)=>{
   }else if(arg.status == 'openLocalnet'){
     openLocalnet()
   }else if(arg.status == 'getHomes'){
-    me.send('notice-vice', {
-      status: 'getHomes',//正在获取列表...
-      homeNames: homeNames
-    })
+    server.send(JSON.stringify({
+      status: 'getHomes'
+    }),'8066',multicastAddr);
+
+    // me.send('notice-vice', {
+    //   status: 'getHomes',//正在获取列表...
+    //   homeNames: homeNames
+    // })
 
 
     // server.send(JSON.stringify({
