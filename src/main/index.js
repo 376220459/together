@@ -267,7 +267,7 @@ function openLocalnet(){
         me.send('notice-vice', {
           status: 'deleteLines',
           homeName: msg.homeName,
-          currentLines: msg.currentLines
+          deleteLines: msg.deleteLines
         })
       }
   })
